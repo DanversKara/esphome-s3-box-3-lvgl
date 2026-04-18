@@ -2286,10 +2286,14 @@ script:
     mode: restart
 
   - id: cctv_refresh_loop
-    # Disabled - cctv_image online_image removed, replaced with icon placeholder
     mode: queued
     then:
-      - logger.log: "CCTV refresh loop disabled (no online_image component)"
+      - delay: 1s
+      - online_image.set_url:
+          id: cctv_image
+          url: ${cctv_snapshot_url}
+      - component.update: cctv_image
+      - script.execute: cctv_refresh_loop
 
 switch:
   - platform: gpio
@@ -3022,6 +3026,10 @@ globals:
   - id: alarm_action
     type: std::string
     initial_value: ""
+  - id: timer_set_seconds
+    type: int
+    restore_value: false
+    initial_value: '0'
   - id: global_is_assisting
     type: bool
     restore_value: false
@@ -3051,10 +3059,24 @@ http_request:
   timeout: 30s
   watchdog_timeout: 60s
 
-# online_image and image sections removed - replaced with MDI icon labels
-# Saves ~150KB RAM per image (no RGB565 decode buffers allocated)
-# CCTV page uses mdi:camera icon (\U000F00A5)
-# Image page uses mdi:file-image icon (\U000F021B)
+# online_image: only cctv_image restored - online_png_image stays removed
+online_image:
+  ## CCTV Camera Image - fetches JPEG snapshot from IP camera
+  - url: ${cctv_snapshot_url}
+    format: jpeg
+    resize: ${image_resize}
+    type: RGB565
+    byte_order: ${image_byte_order}
+    id: cctv_image
+    on_download_finished:
+      - lvgl.image.update:
+          id: lv_cctv_image
+          src: cctv_image
+      - script.execute: cctv_refresh_loop
+    on_error:
+      - lambda: ESP_LOGW("cctv", "Camera snapshot failed to load");
+      - script.stop: cctv_refresh_loop
+
 
 font:
   - file: ${font_file}
@@ -4256,7 +4278,7 @@ lvgl:
                               text: "SET TIMER"
                         on_release:
                           then:
-                            - lvgl.page.show: alarmclock_page
+                            - lvgl.page.show: set_timer_page
 
 ##############################################################################
 ## PAGE 2 — More (swipe from home): Climate, Scenes, Media, Controls
@@ -7029,7 +7051,15 @@ lvgl:
 ##############################################################################
     - id: cctv_page
       skip: true
-      # on_load/on_unload removed - cctv_image online_image replaced with MDI icon
+      on_load:
+        then:
+          - online_image.set_url:
+              id: cctv_image
+              url: ${cctv_snapshot_url}
+          - component.update: cctv_image
+      on_unload:
+        then:
+          - script.stop: cctv_refresh_loop
       widgets:
         - obj:
             styles: page_content
@@ -7044,39 +7074,11 @@ lvgl:
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
-              # Replaced online_image with MDI icon - zero RAM cost
-              - obj:
+              - image:
                   id: lv_cctv_image
                   align: CENTER
                   y: 15
-                  bg_opa: TRANSP
-                  border_opa: TRANSP
-                  layout:
-                    type: FLEX
-                    flex_flow: COLUMN
-                    flex_align_main: CENTER
-                    flex_align_cross: CENTER
-                  widgets:
-                    - label:
-                        text: "\U000F00A5"
-                        text_font: icon_font_55
-                        text_color: 0x888888
-                        align: CENTER
-                        text_align: CENTER
-                    - label:
-                        text: "No live feed"
-                        text_font: my_font12
-                        text_color: 0x888888
-                        align: CENTER
-                        text_align: CENTER
-                    - label:
-                        text: '${cctv_snapshot_url}'
-                        text_font: my_font12
-                        text_color: 0x555555
-                        align: CENTER
-                        text_align: CENTER
-                        long_mode: SCROLL_CIRCULAR
-                        width: 280
+                  src: cctv_image
 
 ##############################################################################
 ## LIV LITE PAGE — Dimmer + Colour controls for lights1_entity
@@ -8917,6 +8919,242 @@ lvgl:
                                        int myhours = id(alarmclock_hour).get_selected_index();
                                        uint8_t newhours = static_cast<uint8_t>(myhours);
                                        return {.second = 00, .minute = newminutes, .hour = newhours};
+
+    - id: set_timer_page
+      skip: true
+      widgets:
+        - obj:
+            styles: page_content
+            widgets:
+              - obj:
+                  align: TOP_MID
+                  styles: header_footer
+                  widgets:
+                    - label:
+                        text: "Set Timer"
+                        y: 3
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+              - obj:
+                  align: CENTER
+                  width: 100%
+                  height: ${page_content_height}
+                  pad_all: 4
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    type: FLEX
+                    flex_flow: COLUMN
+                    flex_align_main: CENTER
+                    flex_align_cross: CENTER
+                    pad_row: 8
+                  widgets:
+                    # Current timer status label
+                    - label:
+                        id: lbl_timer_status
+                        align: CENTER
+                        text_align: CENTER
+                        text_font: my_font12
+                        text_color: 0x44FF88
+                        text: ""
+                    # Rollers row
+                    - obj:
+                        align: CENTER
+                        bg_opa: TRANSP
+                        border_opa: TRANSP
+                        width: 100%
+                        height: 110
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: CENTER
+                          flex_align_cross: CENTER
+                          pad_column: 4
+                        widgets:
+                          - obj:
+                              bg_opa: TRANSP
+                              border_opa: TRANSP
+                              layout:
+                                type: FLEX
+                                flex_flow: COLUMN
+                                flex_align_cross: CENTER
+                              widgets:
+                                - label:
+                                    text: "H"
+                                    text_font: my_font12
+                                    text_color: 0xAAAAAA
+                                - roller:
+                                    id: timer_roller_hours
+                                    align: CENTER
+                                    width: 70
+                                    options:
+                                      - "0"
+                                      - "1"
+                                      - "2"
+                                      - "3"
+                                      - "4"
+                                      - "5"
+                                      - "6"
+                                      - "7"
+                                      - "8"
+                                      - "9"
+                                    selected_index: 0
+                          - label:
+                              text: ":"
+                              text_font: my_font22
+                              text_color: 0xFFFFFF
+                              align: CENTER
+                          - obj:
+                              bg_opa: TRANSP
+                              border_opa: TRANSP
+                              layout:
+                                type: FLEX
+                                flex_flow: COLUMN
+                                flex_align_cross: CENTER
+                              widgets:
+                                - label:
+                                    text: "M"
+                                    text_font: my_font12
+                                    text_color: 0xAAAAAA
+                                - roller:
+                                    id: timer_roller_minutes
+                                    align: CENTER
+                                    width: 70
+                                    options:
+                                      - "00"
+                                      - "01"
+                                      - "02"
+                                      - "03"
+                                      - "04"
+                                      - "05"
+                                      - "10"
+                                      - "15"
+                                      - "20"
+                                      - "25"
+                                      - "30"
+                                      - "45"
+                                    selected_index: 0
+                          - label:
+                              text: ":"
+                              text_font: my_font22
+                              text_color: 0xFFFFFF
+                              align: CENTER
+                          - obj:
+                              bg_opa: TRANSP
+                              border_opa: TRANSP
+                              layout:
+                                type: FLEX
+                                flex_flow: COLUMN
+                                flex_align_cross: CENTER
+                              widgets:
+                                - label:
+                                    text: "S"
+                                    text_font: my_font12
+                                    text_color: 0xAAAAAA
+                                - roller:
+                                    id: timer_roller_seconds
+                                    align: CENTER
+                                    width: 70
+                                    options:
+                                      - "00"
+                                      - "05"
+                                      - "10"
+                                      - "15"
+                                      - "20"
+                                      - "30"
+                                      - "45"
+                                    selected_index: 0
+                    # Buttons row
+                    - obj:
+                        align: CENTER
+                        bg_opa: TRANSP
+                        border_opa: TRANSP
+                        width: 100%
+                        height: 50
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: CENTER
+                          flex_align_cross: CENTER
+                          pad_column: 12
+                        widgets:
+                          - button:
+                              width: 120
+                              height: 44
+                              styles: button_style
+                              pressed:
+                                styles: button_pressed_style
+                              widgets:
+                                - label:
+                                    align: CENTER
+                                    text: "Start"
+                                    text_font: my_font
+                                    text_color: 0x44FF88
+                              on_release:
+                                then:
+                                  - lambda: |-
+                                      // Read roller values
+                                      int h = id(timer_roller_hours).get_selected_index();
+                                      // Minutes roller options: 00,01,02,03,04,05,10,15,20,25,30,45
+                                      int m_idx = id(timer_roller_minutes).get_selected_index();
+                                      int m_vals[] = {0,1,2,3,4,5,10,15,20,25,30,45};
+                                      int m = m_vals[m_idx];
+                                      // Seconds roller options: 00,05,10,15,20,30,45
+                                      int s_idx = id(timer_roller_seconds).get_selected_index();
+                                      int s_vals[] = {0,5,10,15,20,30,45};
+                                      int s = s_vals[s_idx];
+                                      int total_seconds = h*3600 + m*60 + s;
+                                      if (total_seconds > 0) {
+                                        id(timer_set_seconds) = total_seconds;
+                                      }
+                                  - if:
+                                      condition:
+                                        lambda: return id(timer_set_seconds) > 0;
+                                      then:
+                                        - homeassistant.service:
+                                            service: timer.start
+                                            data:
+                                              entity_id: timer.esp32_s3_box_3_timer
+                                            data_template:
+                                              duration: !lambda |-
+                                                int total = id(timer_set_seconds);
+                                                int h = total / 3600;
+                                                int m = (total % 3600) / 60;
+                                                int s = total % 60;
+                                                char buf[12];
+                                                snprintf(buf, sizeof(buf), "%02d:%02d:%02d", h, m, s);
+                                                return std::string(buf);
+                                        - lvgl.label.update:
+                                            id: lbl_timer_status
+                                            text: "Timer started!"
+                                        - delay: 1s
+                                        - lvgl.page.show: idle_page
+                                        - script.execute: draw_display
+                          - button:
+                              width: 120
+                              height: 44
+                              styles: button_style
+                              pressed:
+                                styles: button_pressed_style
+                              widgets:
+                                - label:
+                                    align: CENTER
+                                    text: "Cancel"
+                                    text_font: my_font
+                                    text_color: 0xFF4444
+                              on_release:
+                                then:
+                                  - homeassistant.service:
+                                      service: timer.cancel
+                                      data:
+                                        entity_id: timer.esp32_s3_box_3_timer
+                                  - lvgl.label.update:
+                                      id: lbl_timer_status
+                                      text: "Timer cancelled"
+                                  - delay: 1s
+                                  - lvgl.page.show: idle_page
+                                  - script.execute: draw_display
 
   top_layer:
     widgets:
