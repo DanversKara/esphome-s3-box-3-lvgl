@@ -9011,9 +9011,17 @@ lvgl:
                                 } else {
                                   id(alarmclock_hour).set_selected_index(cur - 12, LV_ANIM_ON);
                                 }
-                            - lambda: |-
-                                int cur = id(alarmclock_hour).get_selected_index();
-                                id(lbl_ampm).set_text(cur < 12 ? "AM" : "PM");
+                            - if:
+                                condition:
+                                  lambda: return id(alarmclock_hour).get_selected_index() < 12;
+                                then:
+                                  - lvgl.label.update:
+                                      id: lbl_ampm
+                                      text: "AM"
+                                else:
+                                  - lvgl.label.update:
+                                      id: lbl_ampm
+                                      text: "PM"
                     - button:
                         width: 110
                         height: 34
