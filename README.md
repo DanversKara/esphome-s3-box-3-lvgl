@@ -46,3 +46,5 @@ Reduces resource usage\
 Improves performance and load consistency\
 
 Replaced with lightweight icons and cleaner text
+
+*Swipe was already there and alarm clock was there by tapping the time top left.
