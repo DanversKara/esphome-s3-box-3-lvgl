@@ -1,14 +1,25 @@
-My Build is based off the github user https://github.com/chrisdunnname/esphome-s3-box-3-lvgl but i am editing their build to work with my devices and my HA
-
-# What i changed?
--- a lot
-- i removed the Bottom Bar that let you move between pages Left/Home/Settings/Right, now you just swipe which was already there, so you get more screen.
-- also changed the buttons.
-- added box sensors
-- added cctv for ipwebcam for android
-- screen saver short cut
-- cooler screen saver design
-- added a timer setting icon so you dont need to ask Ai.
-- also changed the battery icon to % top bar both home/screensaver
-- i removed the analog clock, i dont like analog clock, also helps cut back on memory, code and space.
-- i remvoed github ai images and repalced with no images and speech bubble icon and just its text to cut back on memory and more speed
+Overview
+This project is based on the work by
+https://github.com/chrisdunnname/esphome-s3-box-3-lvgl.  
+It has been modified to better integrate with my devices and Home
+Assistant setup.
+---
+Changes
+Removed the bottom navigation bar (Left / Home / Settings / Right)
+Navigation is now handled entirely by swipe gestures\
+Provides increased usable screen space
+Redesigned UI buttons for improved clarity and consistency
+Added support for box sensors
+Integrated CCTV functionality using IP Webcam (Android)
+Added a screensaver shortcut
+Redesigned the screensaver for a cleaner, more modern appearance
+Added a dedicated timer icon to reduce reliance on voice/AI commands
+Replaced the battery icon with a percentage display in the top bar
+(Home and Screensaver)
+Removed the analog clock
+Reduces memory usage and code size\
+Aligns with a preference for digital display
+Removed external GitHub-hosted images
+Reduces resource usage\
+Improves performance and load consistency\
+Replaced with lightweight icons and cleaner text
