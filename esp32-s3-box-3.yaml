@@ -546,6 +546,20 @@ interval:
                   sprintf(buf, "%.${screensaver_humidity_dp}f%s", id(s3humidity).state, "%");
                   return buf;
 
+  - interval: 1s
+    then:
+      - if:
+          condition:
+            lambda: return id(timer_running) && id(timer_set_seconds) > 0;
+          then:
+            - lambda: id(timer_set_seconds) -= 1;
+      - if:
+          condition:
+            lambda: return id(timer_running) && id(timer_set_seconds) <= 0;
+          then:
+            - lambda: id(timer_running) = false;
+            - switch.turn_on: timer_ringing
+
 button:
   - platform: factory_reset
     id: factory_reset_btn
@@ -3054,6 +3068,10 @@ globals:
     type: bool
     restore_value: true
     initial_value: "true"
+  - id: timer_running
+    type: bool
+    restore_value: false
+    initial_value: 'false'
 
 http_request:
   timeout: 30s
@@ -8965,12 +8983,37 @@ lvgl:
                         on_release:
                           then:
                             - switch.turn_on: alarmclock
-                    - label:
-                        text: " "
+                    - button:
+                        id: btn_ampm
+                        width: 70
+                        height: 34
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        align: CENTER
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 2
                         grid_cell_x_align: CENTER
                         grid_cell_y_align: CENTER
+                        widgets:
+                          - label:
+                              id: lbl_ampm
+                              align: CENTER
+                              text: "AM"
+                              text_font: my_font
+                              text_color: 0xFFFFFF
+                        on_release:
+                          then:
+                            - lambda: |-
+                                int cur = id(alarmclock_hour).get_selected_index();
+                                if (cur < 12) {
+                                  id(alarmclock_hour).set_selected_index(cur + 12, LV_ANIM_ON);
+                                } else {
+                                  id(alarmclock_hour).set_selected_index(cur - 12, LV_ANIM_ON);
+                                }
+                            - lambda: |-
+                                int cur = id(alarmclock_hour).get_selected_index();
+                                id(lbl_ampm).set_text(cur < 12 ? "AM" : "PM");
                     - button:
                         width: 110
                         height: 34
@@ -9158,7 +9201,7 @@ lvgl:
                           - "30"
                           - "45"
                         selected_index: 0
-                    # Row 2 — Start bottom-left, Cancel bottom-right
+                    # Row 2 — Start bottom-left, Status center, Cancel bottom-right
                     - button:
                         width: 110
                         height: 34
@@ -9189,24 +9232,12 @@ lvgl:
                                 int total_seconds = h*3600 + m*60 + s;
                                 if (total_seconds > 0) {
                                   id(timer_set_seconds) = total_seconds;
+                                  id(timer_running) = true;
                                 }
                             - if:
                                 condition:
-                                  lambda: return id(timer_set_seconds) > 0;
+                                  lambda: return id(timer_running);
                                 then:
-                                  - homeassistant.service:
-                                      service: timer.start
-                                      data:
-                                        entity_id: timer.esp32_s3_box_3_timer
-                                      data_template:
-                                        duration: !lambda |-
-                                          int total = id(timer_set_seconds);
-                                          int h = total / 3600;
-                                          int m = (total % 3600) / 60;
-                                          int s = total % 60;
-                                          char buf[12];
-                                          snprintf(buf, sizeof(buf), "%02d:%02d:%02d", h, m, s);
-                                          return std::string(buf);
                                   - lvgl.label.update:
                                       id: lbl_timer_status
                                       text: "Timer started!"
@@ -9243,10 +9274,9 @@ lvgl:
                               text_color: 0xFF4444
                         on_release:
                           then:
-                            - homeassistant.service:
-                                service: timer.cancel
-                                data:
-                                  entity_id: timer.esp32_s3_box_3_timer
+                            - lambda: |-
+                                id(timer_running) = false;
+                                id(timer_set_seconds) = 0;
                             - lvgl.label.update:
                                 id: lbl_timer_status
                                 text: "Cancelled"
