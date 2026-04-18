@@ -11,7 +11,7 @@ Assistant setup.
 
 Changes
 
-Removed the bottom navigation bar (Left / Home / Settings / Right)
+Removed the bottom navigation bar (Left / Home / Settings / Right) (the red circle on unit, is the home button)
 
 Navigation is now handled entirely by swipe gestures\
 
