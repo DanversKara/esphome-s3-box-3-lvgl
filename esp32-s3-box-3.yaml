@@ -8777,60 +8777,61 @@ lvgl:
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
+              # Hidden widgets required for HA switch bindings - kept outside flex flow
+              - button:
+                  id: btn_alarmclock
+                  hidden: true
+                  height: 1
+                  width: 1
+                  styles: button_style
+                  pressed:
+                    styles: button_pressed_style
+                  checked:
+                    styles: button_checked_style
+                  checkable: true
+                  widgets:
+                    - label:
+                        id: ico_alarmclock_1
+                        text: " "
+                  on_value:
+                    then:
+                      - if:
+                          condition:
+                            lambda: return x;
+                          then:
+                            - lvgl.widget.show: lbl_alarmclock
+                            - lvgl.widget.show: lbl_alarmclock_status
+                          else:
+                            - lvgl.widget.hide: lbl_alarmclock
+                            - lvgl.widget.hide: lbl_alarmclock_status
+              - checkbox:
+                  id: chk_snoozeonceonpresence
+                  hidden: true
+                  height: 1
+                  width: 1
+                  text: " "
               - obj:
                   align: CENTER
                   width: 90%
                   height: ${page_content_height}
-                  pad_all: 6
+                  pad_all: 4
                   bg_opa: TRANSP
                   border_opa: TRANSP
+                  scrollable: false
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
-                    flex_align_main: CENTER
+                    flex_align_main: SPACE_BETWEEN
                     flex_align_cross: CENTER
-                    pad_row: 8
+                    pad_row: 0
                   widgets:
-                    # Hidden widgets required for HA switch bindings
-                    - button:
-                        id: btn_alarmclock
-                        hidden: true
-                        height: 1
-                        width: 1
-                        styles: button_style
-                        pressed:
-                          styles: button_pressed_style
-                        checked:
-                          styles: button_checked_style
-                        checkable: true
-                        widgets:
-                          - label:
-                              id: ico_alarmclock_1
-                              text: " "
-                        on_value:
-                          then:
-                            - if:
-                                condition:
-                                  lambda: return x;
-                                then:
-                                  - lvgl.widget.show: lbl_alarmclock
-                                  - lvgl.widget.show: lbl_alarmclock_status
-                                else:
-                                  - lvgl.widget.hide: lbl_alarmclock
-                                  - lvgl.widget.hide: lbl_alarmclock_status
-                    - checkbox:
-                        id: chk_snoozeonceonpresence
-                        hidden: true
-                        height: 1
-                        width: 1
-                        text: " "
                     # Rollers row - H : M centred
                     - obj:
                         align: CENTER
                         bg_opa: TRANSP
                         border_opa: TRANSP
                         width: 100%
-                        height: 110
+                        height: 80
                         layout:
                           type: FLEX
                           flex_flow: ROW
@@ -8853,7 +8854,8 @@ lvgl:
                                 - roller:
                                     id: alarmclock_hour
                                     align: CENTER
-                                    width: 80
+                                    width: 55
+                                    height: 60
                                     options:
                                       - "00"
                                       - "01"
@@ -8908,7 +8910,8 @@ lvgl:
                                 - roller:
                                     id: alarmclock_minutes
                                     align: CENTER
-                                    width: 80
+                                    width: 55
+                                    height: 60
                                     options:
                                       - "00"
                                       - "05"
@@ -8941,9 +8944,9 @@ lvgl:
                         layout:
                           type: FLEX
                           flex_flow: ROW
-                          flex_align_main: CENTER
+                          flex_align_main: SPACE_BETWEEN
                           flex_align_cross: CENTER
-                          pad_column: 12
+                          pad_column: 0
                         widgets:
                           - button:
                               width: 120
@@ -8996,15 +8999,16 @@ lvgl:
                   align: CENTER
                   width: 90%
                   height: ${page_content_height}
-                  pad_all: 6
+                  pad_all: 4
                   bg_opa: TRANSP
                   border_opa: TRANSP
+                  scrollable: false
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
-                    flex_align_main: CENTER
+                    flex_align_main: SPACE_BETWEEN
                     flex_align_cross: CENTER
-                    pad_row: 8
+                    pad_row: 0
                   widgets:
                     # Current timer status label
                     - label:
@@ -9020,7 +9024,7 @@ lvgl:
                         bg_opa: TRANSP
                         border_opa: TRANSP
                         width: 100%
-                        height: 110
+                        height: 80
                         layout:
                           type: FLEX
                           flex_flow: ROW
@@ -9043,7 +9047,8 @@ lvgl:
                                 - roller:
                                     id: timer_roller_hours
                                     align: CENTER
-                                    width: 60
+                                    width: 45
+                                    height: 60
                                     options:
                                       - "0"
                                       - "1"
@@ -9076,7 +9081,8 @@ lvgl:
                                 - roller:
                                     id: timer_roller_minutes
                                     align: CENTER
-                                    width: 60
+                                    width: 45
+                                    height: 60
                                     options:
                                       - "00"
                                       - "01"
@@ -9111,7 +9117,8 @@ lvgl:
                                 - roller:
                                     id: timer_roller_seconds
                                     align: CENTER
-                                    width: 60
+                                    width: 45
+                                    height: 60
                                     options:
                                       - "00"
                                       - "05"
@@ -9131,9 +9138,9 @@ lvgl:
                         layout:
                           type: FLEX
                           flex_flow: ROW
-                          flex_align_main: CENTER
+                          flex_align_main: SPACE_BETWEEN
                           flex_align_cross: CENTER
-                          pad_column: 12
+                          pad_column: 0
                         widgets:
                           - button:
                               width: 120
