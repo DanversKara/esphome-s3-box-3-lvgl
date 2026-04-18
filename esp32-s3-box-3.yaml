@@ -6620,7 +6620,7 @@ lvgl:
                   text_align: CENTER
                   text_font: icon_font_55
                   text_color: 0xFFCC00
-                  text: "\U000F04E6"
+                  text: "\U000F0240"
               - label:
                   align: CENTER
                   y: 15
