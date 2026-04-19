@@ -45,6 +45,10 @@ Reduces resource usage\
 
 Improves performance and load consistency\
 
+i replaced HAL, Default and all other wake words with OKAY Computer
+
+also turn off notificaiton sound, turn off wake sound, i find it delays ai from waking up to wake names. make sure you tunr on enable speaker.
+
 Replaced with lightweight icons and cleaner text
 
 *Swipe was already there and alarm clock was there by tapping the time top left.
