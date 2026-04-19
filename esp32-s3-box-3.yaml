@@ -13,7 +13,7 @@ substitutions:
   api_key: QhTgdqqJ3XY9DbDuN8NS1+zXUr8NaY83pab4dqgy8Yk=
   
   wifi_fallback_pwd: s3box123
-  home_page_title: "Say: OKAY HAL"
+  home_page_title: "Say: OKAY COMPUTER"
   climate_page_title: "Climate"
   climate1_name: "Room 1 AC"
   climate1_entity: climate.air_conditioner #climate
@@ -136,7 +136,7 @@ substitutions:
   light_widget_entity: light.living_room_light  ## ← change to your color/dim light entity
 
   # ── CCTV Camera Page ──────────────────────────────────────────────────────
-  cctv_page_title: "CCTV"
+  cctv_page_title: ""
   cctv_camera_entity: camera.frontdoor  ## ← change to your HA camera entity id
   cctv_snapshot_url: "http://user:pass@192.168.1.120:8080/shot.jpg?width=352&height=288"  ## ← IP Webcam URL
 
@@ -188,22 +188,6 @@ substitutions:
   # loading_illustration_file: removed — replaced with mdi:file-image icon label
   # cctv image: removed — replaced with mdi:camera icon label
   
-######  Animated Voice Assistant images ######
-  # anim_listening1: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/listening_1.png #listening
-  # anim_listening2: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/listening_2.png #listening, thinking
-  # anim_thinking1: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/thinking_1.png #thinking
-  # anim_thinking2: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/thinking_2.png #thinking, replying
-  # anim_replying1: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/replying_1.png #replying
-  # anim_replying2: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/replying_2.png #replying
-  # anim_error1: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/error_1.png #error
-  # anim2_listening: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_grey.jpg
-  # anim2_thinking: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_white.jpg
-  # anim2_replying1: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_colors_1.jpg
-  # anim2_replying2: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_colors_2.jpg
-  # anim2_replying3: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_colors_3.jpg
-  # anim2_replying4: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_colors_4.jpg
-  # anim2_error: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_orange.jpg
-
 ######  Audio Files ######
 # FLAC files for on device sounds
   timerfinished_ondevice: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/sounds/timer_finished.flac
@@ -1158,27 +1142,8 @@ micro_wake_word:
   vad:
   stop_after_detection: false
   models:
-    - model: okay_nabu
-      id: okay_nabu
-    - model: hey_mycroft
-      id: hey_mycroft
-    - model: hey_jarvis
-      id: hey_jarvis
-    - model: alexa
-      id: alexa
-    # experimental models
-    #- model: https://github.com/esphome/micro-wake-word-models/raw/main/models/v2/experiments/okay_computer.json
-    #  id: okay_computer
-    #- model: https://github.com/esphome/micro-wake-word-models/raw/main/models/v2/experiments/hey_home_assistant.json
-    #  id: hey_home_assistant
-    - model: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/microwakeword/okay_hal.json
-      id: okay_hal
-    - model: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/microwakeword/hey_luna.json
-      id: hey_luna
-    - model: https://raw.githubusercontent.com/JohnnyPrimus/Custom_V2_MicroWakeWords/refs/heads/main/models/computer/computer.json
-      id: computer
-    - model: https://raw.githubusercontent.com/JohnnyPrimus/Custom_V2_MicroWakeWords/refs/heads/main/models/hey_friday/hey_friday.json
-      id: hey_friday
+    - model: https://raw.githubusercontent.com/esphome/micro-wake-word-models/refs/heads/main/models/v2/experiments/okay_computer.json
+      id: okay_computer
     - model: https://github.com/kahrendt/microWakeWord/releases/download/stop/stop.json
       id: stop
       internal: true
@@ -2130,69 +2095,6 @@ script:
           then:
             - if:
                 condition: 
-                  lambda: return (id(uimode).current_option() == "Default" || id(uimode).current_option() == "" || id(uimode).current_option().empty());
-                then:
-                  - lvgl.style.update:
-                      id: header_footer
-                      bg_color: 0x1d5f96
-                      bg_grad_color: 0x004466
-                  - lvgl.style.update:
-                      id: button_style
-                      bg_color: 0x000000
-                      bg_grad_color: 0x005782
-                  - lvgl.style.update:
-                      id: button_standard_style
-                      bg_color: 0x2F8CD8
-                      bg_grad_color: 0x005782
-                  - lvgl.style.update:
-                      id: button_pressed_style
-                      bg_color: 0x666666
-                      bg_grad_color: 0x00334d
-                  - lvgl.style.update:
-                      id: button_checked_style
-                      bg_color: 0x000000
-                      bg_grad_color: 0x002233
-                  # Pages shown contextually by draw_display script
-                # else:
-                  # - lvgl.widget.hide: listening
-                  # - lvgl.widget.hide: thinking
-                  # - lvgl.widget.hide: replying
-                  # - lvgl.widget.hide: error
-            - if:
-                condition: 
-                  lambda: return (id(uimode).current_option() == "HAL");
-                then:
-                  - lvgl.style.update:
-                      id: header_footer
-                      bg_color: 0x1a1a1a
-                      bg_grad_color: 0x000000
-                  - lvgl.style.update:
-                      id: button_style
-                      bg_color: 0x000000
-                      bg_grad_color: 0x000000
-                  - lvgl.style.update:
-                      id: button_standard_style
-                      bg_color: 0xcc0000
-                      bg_grad_color: 0x800000
-                  - lvgl.style.update:
-                      id: button_pressed_style
-                      bg_color: 0x666666
-                      bg_grad_color: 0x4d0000
-                  - lvgl.style.update:
-                      id: button_checked_style
-                      bg_color: 0x000000
-                      bg_grad_color: 0x4d0000
-                  # - lvgl.widget.show: listening_anim
-                  # - lvgl.widget.show: thinking_anim
-                  # - lvgl.widget.show: replying_anim
-                  # - lvgl.widget.show: error_anim
-                # else:
-                  # - lvgl.widget.hide: listening_anim
-                  # - lvgl.widget.hide: thinking_anim
-                  # - lvgl.widget.hide: replying_anim
-                  # - lvgl.widget.hide: error_anim
-            - if:
-                condition: 
                   lambda: return (id(uimode).current_option() == "Home");
                 then:
                   - lvgl.style.update:
@@ -2215,58 +2117,8 @@ script:
                       id: button_checked_style
                       bg_color: 0x000000
                       bg_grad_color: 0x002233
-                  # - lvgl.widget.show: listening_anim2
-                  # - lvgl.widget.show: thinking_anim2
-                  # - lvgl.widget.show: replying_anim2
-                  # - lvgl.widget.show: error_anim2
-                # else:
-                  # - lvgl.widget.hide: listening_anim2
-                  # - lvgl.widget.hide: thinking_anim2
-                  # - lvgl.widget.hide: replying_anim2
-                  # - lvgl.widget.hide: error_anim2
             - lambda: strncpy(id(current_uimode), id(uimode).current_option().c_str(), 50);
             - lvgl.widget.redraw:
-          # else:
-            # - if:
-                # condition:
-                  # lambda: |-
-                        # return (id(voice_assistant_phase) == ${voice_assist_listening_phase_id} && id(uimode).current_option() == "HAL");
-                # then:
-                  # - lvgl.animimg.start:
-                      # id: listening_anim
-                # else:
-                  # - lvgl.animimg.stop:
-                      # id: listening_anim
-            # - if:
-                # condition:
-                  # lambda: |-
-                        # return (id(voice_assistant_phase) == ${voice_assist_thinking_phase_id} && id(uimode).current_option() == "HAL");
-                # then:
-                  # - lvgl.animimg.start:
-                      # id: thinking_anim
-                # else:
-                  # - lvgl.animimg.stop:
-                      # id: thinking_anim
-            # - if:
-                # condition:
-                  # lambda: |-
-                        # return (id(voice_assistant_phase) == ${voice_assist_replying_phase_id} && id(uimode).current_option() == "HAL");
-                # then:
-                  # - lvgl.animimg.start:
-                      # id: replying_anim
-                # else:
-                  # - lvgl.animimg.stop:
-                      # id: replying_anim
-            # - if:
-                # condition:
-                  # lambda: |-
-                        # return (id(voice_assistant_phase) == ${voice_assist_replying_phase_id} && id(uimode).current_option() == "Home");
-                # then:
-                  # - lvgl.animimg.start:
-                      # id: replying_anim2
-                # else:
-                  # - lvgl.animimg.stop:
-                      # id: replying_anim2
 
   - id: snoozealarm
     then:
@@ -2314,7 +2166,7 @@ script:
   - id: cctv_refresh_loop
     mode: queued
     then:
-      - delay: 1s
+      - delay: 300ms
       - online_image.set_url:
           id: cctv_image
           url: ${cctv_snapshot_url}
@@ -2764,38 +2616,11 @@ select:
     on_value:
       lambda: |-
         if (x == "Slightly sensitive") {
-          id(okay_nabu).set_probability_cutoff(217);    // 0.85 -> 0.000 FAPH on DipCo (Manifest's default)
-          id(hey_jarvis).set_probability_cutoff(247);   // 0.97 -> 0.563 FAPH on DipCo (Manifest's default)
-          id(hey_mycroft).set_probability_cutoff(253);  // 0.99 -> 0.567 FAPH on DipCo
-          id(alexa).set_probability_cutoff(250);  // 0.98
-          //id(okay_computer).set_probability_cutoff(247);
-          //id(hey_home_assistant).set_probability_cutoff(247);
-          id(okay_hal).set_probability_cutoff(247);
-          id(hey_luna).set_probability_cutoff(247);
-          id(computer).set_probability_cutoff(247);
-          id(hey_friday).set_probability_cutoff(247);
+          id(okay_computer).set_probability_cutoff(247);
         } else if (x == "Moderately sensitive") {
-          id(okay_nabu).set_probability_cutoff(176);    // 0.69 -> 0.376 FAPH on DipCo
-          id(hey_jarvis).set_probability_cutoff(235);   // 0.92 -> 0.939 FAPH on DipCo
-          id(hey_mycroft).set_probability_cutoff(242);  // 0.95 -> 1.502 FAPH on DipCo (Manifest's default)
-          id(alexa).set_probability_cutoff(235); // 0.92
-          //id(okay_computer).set_probability_cutoff(235);
-          //id(hey_home_assistant).set_probability_cutoff(235);
-          id(okay_hal).set_probability_cutoff(235);
-          id(hey_luna).set_probability_cutoff(235);
-          id(computer).set_probability_cutoff(235);
-          id(hey_friday).set_probability_cutoff(235);
+          id(okay_computer).set_probability_cutoff(235);
         } else if (x == "Very sensitive") {
-          id(okay_nabu).set_probability_cutoff(143);    // 0.56 -> 0.751 FAPH on DipCo
-          id(hey_jarvis).set_probability_cutoff(212);   // 0.83 -> 1.502 FAPH on DipCo
-          id(hey_mycroft).set_probability_cutoff(237);  // 0.93 -> 1.878 FAPH on DipCo
-          id(alexa).set_probability_cutoff(217); // 0.85
-          //id(okay_computer).set_probability_cutoff(212);
-          //id(hey_home_assistant).set_probability_cutoff(212);
-          id(okay_hal).set_probability_cutoff(212);
-          id(hey_luna).set_probability_cutoff(212);
-          id(computer).set_probability_cutoff(212);
-          id(hey_friday).set_probability_cutoff(212);
+          id(okay_computer).set_probability_cutoff(212);
         }
 
   - platform: lvgl
@@ -7111,9 +6936,18 @@ lvgl:
         - obj:
             styles: page_content
             widgets:
+              - image:
+                  id: lv_cctv_image
+                  align: TOP_MID
+                  y: 0
+                  width: 100%
+                  height: 100%
+                  src: cctv_image
               - obj:
                   align: TOP_MID
                   styles: header_footer
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
                   widgets:
                     - label:
                         text: '${cctv_page_title}'
@@ -7121,11 +6955,6 @@ lvgl:
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
-              - image:
-                  id: lv_cctv_image
-                  align: CENTER
-                  y: 15
-                  src: cctv_image
 
 ##############################################################################
 ## LIV LITE PAGE — Dimmer + Colour controls for lights1_entity
@@ -8681,8 +8510,6 @@ lvgl:
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
                         options:
-                          - Default
-                          - HAL
                           - Home
                         dropdown_list:
                           selected:
@@ -9524,7 +9351,7 @@ lvgl:
                 text_align: CENTER
                 text_color: 0x18bcf2
                 text_font: montserrat_48
-                text: "HAL"
+                text: "BOOTING"
             - label:
                 align: CENTER
                 y: 30
