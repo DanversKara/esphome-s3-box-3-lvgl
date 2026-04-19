@@ -325,6 +325,7 @@ i2s_audio:
       ignore_strapping_warning: true
     i2s_bclk_pin: GPIO17
     i2s_mclk_pin: GPIO2
+    use_apll: false
 
 audio_adc:
   - platform: es7210
@@ -1255,7 +1256,7 @@ voice_assistant:
                       - wait_until:
                           not:
                             - media_player.is_announcing:
-                      - delay: 150ms
+                      - delay: 500ms
                     else:
                       if:
                         condition:
@@ -1359,6 +1360,7 @@ voice_assistant:
           - lambda: return id(wake_word_engine_location).current_option() == "On device";
         then:
           - lambda: id(va).set_use_wake_word(false);
+          - delay: 500ms
           - micro_wake_word.start:
     - script.execute: set_idle_or_mute_phase
     - script.execute: draw_display
