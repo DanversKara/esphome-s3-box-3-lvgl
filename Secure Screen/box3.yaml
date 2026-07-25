@@ -146,7 +146,7 @@ substitutions:
   # ── CCTV Camera Page ──────────────────────────────────────────────────────
   cctv_page_title: ""
   cctv_camera_entity: camera.frontdoor  ## ← change to your HA camera entity id
-  cctv_snapshot_url: "http://user:password@192.168.8.246:8080/photo.jpg"  ## ← IP Webcam URL
+  cctv_snapshot_url: "http://user:password@192.168.8.246:8080/photoaf.jpg"  ## ← IP Webcam URL
 
   # ── Page 2 (second swipe page) ────────────────────────────────────────────
   page2_title: "More"  ## ← title for second icon page
@@ -483,6 +483,9 @@ time:
           - script.execute: time_update
 
 interval:
+  - interval: 150ms
+    then:
+      - script.execute: no_connection_glitch_tick
   - interval: 15s #requires WIFI
     then:
       - if:
@@ -492,6 +495,7 @@ interval:
             - lambda: id(api_connection) = true;
           else:
             - lambda: id(api_connection) = false;
+      - script.execute: draw_display
       - if: #requires WIFI
           condition:
             - lambda: return id(wifi_connection);
@@ -1460,6 +1464,7 @@ script:
                             then:
                               - lambda: id(voice_assistant_phase) = ${voice_assist_timer_finished_phase_id};
                         - lvgl.widget.show: lbl_api
+                        - lvgl.widget.show: topbar_container
                         - script.execute: set_uimode
                         - if:
                             condition:
@@ -1541,12 +1546,14 @@ script:
                       else:
                         - lvgl.widget.hide: lbl_api
                         - lvgl.widget.hide: boot_screen
-                        - lvgl.page.show: ${default_page}
+                        - lvgl.widget.hide: topbar_container
+                        - lvgl.page.show: no_connection_page
                 else:
                   - lvgl.widget.hide: lbl_api
                   - lvgl.widget.hide: lbl_wifi
                   - lvgl.widget.hide: boot_screen
-                  - lvgl.page.show: ${default_page}
+                  - lvgl.widget.hide: topbar_container
+                  - lvgl.page.show: no_connection_page
             - if:
                 condition:
                   not:
@@ -1555,6 +1562,113 @@ script:
                    - lvgl.widget.show: lbl_time
           else:
             - lvgl.widget.show: boot_screen
+
+  - id: no_connection_glitch_tick
+    then:
+      - if:
+          condition:
+            lvgl.page.is_showing: no_connection_page
+          then:
+            - lvgl.label.update:
+                id: no_conn_main
+                x: !lambda return (rand() % 7) - 3;
+                y: !lambda return (rand() % 5) - 2;
+                text_color: !lambda |-
+                  int r = rand() % 12;
+                  if (r < 1) return Color(0xFFFFFF);
+                  else if (r < 3) return Color(0xFF3131);
+                  else return Color(0xCC0000);
+            - lvgl.label.update:
+                id: no_conn_ghost_cyan
+                x: !lambda return -3 + (rand() % 5) - 2;
+                y: !lambda return -2 + (rand() % 3) - 1;
+            - lvgl.label.update:
+                id: no_conn_ghost_magenta
+                x: !lambda return 3 + (rand() % 5) - 2;
+                y: !lambda return 2 + (rand() % 3) - 1;
+            - if:
+                condition:
+                  lambda: return (rand() % 5) == 0;
+                then:
+                  - lvgl.widget.update:
+                      id: glitch_bar
+                      y: !lambda return rand() % 220;
+                      height: !lambda return 2 + (rand() % 8);
+                  - lvgl.widget.show: glitch_bar
+                else:
+                  - lvgl.widget.hide: glitch_bar
+            - lvgl.label.update:
+                id: rain_col_1
+                y: !lambda |-
+                  static int y = 0; y += 16; if (y > 230) y = -16; return y;
+                text: !lambda |-
+                  static const char cs[] = "01ABCDEFHKMXZ$#%&*+=<>/";
+                  char b[2] = { cs[rand() % (sizeof(cs)-1)], 0 }; return std::string(b);
+                text_color: !lambda |-
+                  return (rand() % 4 == 0) ? Color(0x20FC30) : Color(0x0B5D16);
+            - lvgl.label.update:
+                id: rain_col_2
+                y: !lambda |-
+                  static int y = 40; y += 16; if (y > 230) y = -16; return y;
+                text: !lambda |-
+                  static const char cs[] = "01ABCDEFHKMXZ$#%&*+=<>/";
+                  char b[2] = { cs[rand() % (sizeof(cs)-1)], 0 }; return std::string(b);
+                text_color: !lambda |-
+                  return (rand() % 4 == 0) ? Color(0x20FC30) : Color(0x0B5D16);
+            - lvgl.label.update:
+                id: rain_col_3
+                y: !lambda |-
+                  static int y = 90; y += 16; if (y > 230) y = -16; return y;
+                text: !lambda |-
+                  static const char cs[] = "01ABCDEFHKMXZ$#%&*+=<>/";
+                  char b[2] = { cs[rand() % (sizeof(cs)-1)], 0 }; return std::string(b);
+                text_color: !lambda |-
+                  return (rand() % 4 == 0) ? Color(0x20FC30) : Color(0x0B5D16);
+            - lvgl.label.update:
+                id: rain_col_4
+                y: !lambda |-
+                  static int y = 10; y += 16; if (y > 230) y = -16; return y;
+                text: !lambda |-
+                  static const char cs[] = "01ABCDEFHKMXZ$#%&*+=<>/";
+                  char b[2] = { cs[rand() % (sizeof(cs)-1)], 0 }; return std::string(b);
+                text_color: !lambda |-
+                  return (rand() % 4 == 0) ? Color(0x20FC30) : Color(0x0B5D16);
+            - lvgl.label.update:
+                id: rain_col_5
+                y: !lambda |-
+                  static int y = 60; y += 16; if (y > 230) y = -16; return y;
+                text: !lambda |-
+                  static const char cs[] = "01ABCDEFHKMXZ$#%&*+=<>/";
+                  char b[2] = { cs[rand() % (sizeof(cs)-1)], 0 }; return std::string(b);
+                text_color: !lambda |-
+                  return (rand() % 4 == 0) ? Color(0x20FC30) : Color(0x0B5D16);
+            - lvgl.label.update:
+                id: rain_col_6
+                y: !lambda |-
+                  static int y = 120; y += 16; if (y > 230) y = -16; return y;
+                text: !lambda |-
+                  static const char cs[] = "01ABCDEFHKMXZ$#%&*+=<>/";
+                  char b[2] = { cs[rand() % (sizeof(cs)-1)], 0 }; return std::string(b);
+                text_color: !lambda |-
+                  return (rand() % 4 == 0) ? Color(0x20FC30) : Color(0x0B5D16);
+            - lvgl.label.update:
+                id: rain_col_7
+                y: !lambda |-
+                  static int y = 25; y += 16; if (y > 230) y = -16; return y;
+                text: !lambda |-
+                  static const char cs[] = "01ABCDEFHKMXZ$#%&*+=<>/";
+                  char b[2] = { cs[rand() % (sizeof(cs)-1)], 0 }; return std::string(b);
+                text_color: !lambda |-
+                  return (rand() % 4 == 0) ? Color(0x20FC30) : Color(0x0B5D16);
+            - lvgl.label.update:
+                id: rain_col_8
+                y: !lambda |-
+                  static int y = 150; y += 16; if (y > 230) y = -16; return y;
+                text: !lambda |-
+                  static const char cs[] = "01ABCDEFHKMXZ$#%&*+=<>/";
+                  char b[2] = { cs[rand() % (sizeof(cs)-1)], 0 }; return std::string(b);
+                text_color: !lambda |-
+                  return (rand() % 4 == 0) ? Color(0x20FC30) : Color(0x0B5D16);
 
   - id: fetch_first_active_timer
     then:
@@ -6750,6 +6864,239 @@ lvgl:
             y: 8
             text: 'DS: --'
 
+    - id: no_connection_page
+      skip: true
+      widgets:
+        - obj:
+            width: 100%
+            height: 100%
+            align: CENTER
+            bg_color: 0x000000
+            bg_opa: COVER
+            border_width: 0
+            radius: 0
+            pad_all: 0
+            widgets:
+              # ── faint scanline texture ──────────────────────────────────
+              - obj:
+                  width: 100%
+                  height: 2
+                  align: TOP_LEFT
+                  y: 0
+                  bg_color: 0x002200
+                  bg_opa: 25%
+                  border_width: 0
+                  radius: 0
+              - obj:
+                  width: 100%
+                  height: 2
+                  align: TOP_LEFT
+                  y: 20
+                  bg_color: 0x002200
+                  bg_opa: 25%
+                  border_width: 0
+                  radius: 0
+              - obj:
+                  width: 100%
+                  height: 2
+                  align: TOP_LEFT
+                  y: 40
+                  bg_color: 0x002200
+                  bg_opa: 25%
+                  border_width: 0
+                  radius: 0
+              - obj:
+                  width: 100%
+                  height: 2
+                  align: TOP_LEFT
+                  y: 60
+                  bg_color: 0x002200
+                  bg_opa: 25%
+                  border_width: 0
+                  radius: 0
+              - obj:
+                  width: 100%
+                  height: 2
+                  align: TOP_LEFT
+                  y: 80
+                  bg_color: 0x002200
+                  bg_opa: 25%
+                  border_width: 0
+                  radius: 0
+              - obj:
+                  width: 100%
+                  height: 2
+                  align: TOP_LEFT
+                  y: 100
+                  bg_color: 0x002200
+                  bg_opa: 25%
+                  border_width: 0
+                  radius: 0
+              - obj:
+                  width: 100%
+                  height: 2
+                  align: TOP_LEFT
+                  y: 120
+                  bg_color: 0x002200
+                  bg_opa: 25%
+                  border_width: 0
+                  radius: 0
+              - obj:
+                  width: 100%
+                  height: 2
+                  align: TOP_LEFT
+                  y: 140
+                  bg_color: 0x002200
+                  bg_opa: 25%
+                  border_width: 0
+                  radius: 0
+              - obj:
+                  width: 100%
+                  height: 2
+                  align: TOP_LEFT
+                  y: 160
+                  bg_color: 0x002200
+                  bg_opa: 25%
+                  border_width: 0
+                  radius: 0
+              - obj:
+                  width: 100%
+                  height: 2
+                  align: TOP_LEFT
+                  y: 180
+                  bg_color: 0x002200
+                  bg_opa: 25%
+                  border_width: 0
+                  radius: 0
+              - obj:
+                  width: 100%
+                  height: 2
+                  align: TOP_LEFT
+                  y: 200
+                  bg_color: 0x002200
+                  bg_opa: 25%
+                  border_width: 0
+                  radius: 0
+              - obj:
+                  width: 100%
+                  height: 2
+                  align: TOP_LEFT
+                  y: 220
+                  bg_color: 0x002200
+                  bg_opa: 25%
+                  border_width: 0
+                  radius: 0
+              # ── matrix-style falling character columns ──────────────────
+              - label:
+                  id: rain_col_1
+                  align: TOP_LEFT
+                  x: 6
+                  y: 0
+                  text_font: my_font16
+                  text_color: green
+                  text: "0"
+              - label:
+                  id: rain_col_2
+                  align: TOP_LEFT
+                  x: 44
+                  y: 40
+                  text_font: my_font16
+                  text_color: green
+                  text: "1"
+              - label:
+                  id: rain_col_3
+                  align: TOP_LEFT
+                  x: 82
+                  y: 90
+                  text_font: my_font16
+                  text_color: green
+                  text: "A"
+              - label:
+                  id: rain_col_4
+                  align: TOP_RIGHT
+                  x: -6
+                  y: 10
+                  text_font: my_font16
+                  text_color: green
+                  text: "F"
+              - label:
+                  id: rain_col_5
+                  align: TOP_RIGHT
+                  x: -44
+                  y: 60
+                  text_font: my_font16
+                  text_color: green
+                  text: "X"
+              - label:
+                  id: rain_col_6
+                  align: TOP_RIGHT
+                  x: -82
+                  y: 120
+                  text_font: my_font16
+                  text_color: green
+                  text: "%"
+              - label:
+                  id: rain_col_7
+                  align: TOP_MID
+                  x: -140
+                  y: 25
+                  text_font: my_font16
+                  text_color: green
+                  text: "K"
+              - label:
+                  id: rain_col_8
+                  align: TOP_MID
+                  x: 140
+                  y: 150
+                  text_font: my_font16
+                  text_color: green
+                  text: "$"
+              # ── occasional white "tear" bar for a CRT glitch roll ────────
+              - obj:
+                  id: glitch_bar
+                  hidden: true
+                  width: 100%
+                  height: 4
+                  align: TOP_LEFT
+                  y: 0
+                  bg_color: 0xFFFFFF
+                  bg_opa: 35%
+                  border_width: 0
+                  radius: 0
+              # ── chromatic-aberration "ghost" copies behind the main text ─
+              - label:
+                  id: no_conn_ghost_cyan
+                  align: CENTER
+                  x: -3
+                  y: -2
+                  text_font: montserrat_28
+                  text_color: 0x00FFFF
+                  text_opa: 55%
+                  text: "NO CONNECTION"
+              - label:
+                  id: no_conn_ghost_magenta
+                  align: CENTER
+                  x: 3
+                  y: 2
+                  text_font: montserrat_28
+                  text_color: 0xFF00FF
+                  text_opa: 55%
+                  text: "NO CONNECTION"
+              - label:
+                  id: no_conn_main
+                  align: CENTER
+                  text_font: montserrat_28
+                  text_color: red
+                  text: "NO CONNECTION"
+              - label:
+                  id: no_conn_sub
+                  align: CENTER
+                  y: 30
+                  text_font: my_font12
+                  text_color: 0x666666
+                  text_align: CENTER
+                  text: "Attempting to reconnect to Home Assistant..."
+
     - id: listening_page
       skip: true
       widgets:
@@ -9566,6 +9913,7 @@ lvgl:
   top_layer:
     widgets:
       - obj:
+          id: topbar_container
           layout: horizontal
           align: top_left
           styles: header_footer
