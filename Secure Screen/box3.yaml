@@ -7,7 +7,7 @@ substitutions:
   external_media_player: living_room_speaker
   
   # change to the full url or IP of your HA server including port
-  home_assistant_host: http://192.168.1.35:8123
+  home_assistant_host: http://192.168.8.162:8123
   
   # Device specific API KEY
   api_key: QhTgdqqJ3XY9DbDuN8NS1+zXUr8NaY83pab4dqgy8Yk=
@@ -29,7 +29,7 @@ substitutions:
   climate6_entity: sensor.temperature6 #sensor
   lights_page_title: "Lights"
   lights1_name: "LIV LITE"
-  lights1_entity: light.living_room_light
+  lights1_entity: light.color_light
   lights2_name: "Light 2"
   lights2_entity: switch.light2
   lights3_name: "Light 3"
@@ -114,6 +114,14 @@ substitutions:
   security3_icon_off: "\U000F033F" #icon from icon_glyphs
   security3_icon_on: "\U000F033E" #icon from icon_glyphs
   keypad_page_title: "Code"
+
+  # ── Front Door Lock Screen ────────────────────────────────────────────────
+  front_door_name: "Front Door"
+  front_door_entity: lock.front_door_lock  ## ← change to your front door lock entity id
+  settings_pin: !secret settings_pin  ## PIN required to reveal all hidden pages/settings menu
+  master_pin: !secret master_pin  ## PIN required to unlock the front door from the lock screen
+  door_alarm_door_name: "Door Status"
+  door_alarm_door_entity: binary_sensor.door_alarm_door  ## ← change if your entity id differs
   screensaver_page_title: " "
   screensaver_weather_entity: weather.home #weather
   screensaver_weather_dp: 1 #decimal places for weather temperature
@@ -129,16 +137,16 @@ substitutions:
   screensaver_lower_right_units: " IAI"
   notification_page_title: "Notification"
   wifi_qr_code: !secret wifi_qr #QR code for wifi
-  default_page: idle_page #set default idle page e.g. idle_page, lights_page, scenes_page, controls_page
+  default_page: main_lock_page #boot/idle page - lock screen. All other pages are hidden until settings_pin is entered.
 
   # ── Light Widget (Dimmer + Color) ─────────────────────────────────────────
   light_widget_name: "LIV LITE"
-  light_widget_entity: light.living_room_light  ## ← change to your color/dim light entity
+  light_widget_entity: light.color_light  ## ← change to your color/dim light entity
 
   # ── CCTV Camera Page ──────────────────────────────────────────────────────
   cctv_page_title: ""
   cctv_camera_entity: camera.frontdoor  ## ← change to your HA camera entity id
-  cctv_snapshot_url: "http://user:pass@192.168.1.120:8080/shot.jpg?width=352&height=288"  ## ← IP Webcam URL
+  cctv_snapshot_url: "http://ash:466911Zoey@192.168.8.246:8080/shot.jpg?width=352&height=288"  ## ← IP Webcam URL
 
   # ── Page 2 (second swipe page) ────────────────────────────────────────────
   page2_title: "More"  ## ← title for second icon page
@@ -2238,6 +2246,24 @@ switch:
             checked: false
  
   - platform: template
+    name: Require PIN to unlock front door
+    id: front_door_require_pin
+    icon: 'mdi:lock-question'
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    entity_category: config
+    turn_on_action:
+      - lvgl.checkbox.update:
+          id: chk_front_door_pin
+          state:
+            checked: true
+    turn_off_action:
+      - lvgl.checkbox.update:
+          id: chk_front_door_pin
+          state:
+            checked: false
+
+  - platform: template
     name: Mute
     id: mute_switch
     icon: "mdi:microphone-off"
@@ -3776,6 +3802,49 @@ text_sensor:
                         id: ico_scenes_6
                         text: '${scenes6_icon_on}'
 
+### FRONT DOOR LOCK SCREEN SENSOR ###
+  - platform: homeassistant
+    id: front_door_item
+    entity_id: ${front_door_entity}
+    internal: true
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: return (id(front_door_item).state == "locked");
+            then:
+              - lvgl.label.update:
+                  id: ico_front_door_lock
+                  text_color: lime
+                  text: "\U000F033E"
+              - lvgl.label.update:
+                  id: lbl_front_door_status
+                  text_color: lime
+                  text: "LOCKED"
+              - lvgl.label.update:
+                  id: lbl_front_door_action
+                  text: "Tap to Unlock"
+              - lvgl.widget.update:
+                  id: but_front_door_lock
+                  bg_color: 0x001a00
+                  bg_grad_color: 0x003300
+            else:
+              - lvgl.label.update:
+                  id: ico_front_door_lock
+                  text_color: red
+                  text: "\U000F033F"
+              - lvgl.label.update:
+                  id: lbl_front_door_status
+                  text_color: red
+                  text: "UNLOCKED"
+              - lvgl.label.update:
+                  id: lbl_front_door_action
+                  text: "Tap to Lock"
+              - lvgl.widget.update:
+                  id: but_front_door_lock
+                  bg_color: 0x330000
+                  bg_grad_color: 0x1a0000
+
 ### SECURITY PAGE TEXT SENSORS ###
   - platform: homeassistant
     id: security1_item
@@ -3898,49 +3967,93 @@ key_collector:
             - lambda: |-
                 ESP_LOGD("LVGL Keypad", "Current PIN: %s", x.c_str());
     on_timeout:
-      - lvgl.page.show: security_page
+      - if:
+          condition:
+            lambda: return (id(alarm_action) == "unlock_front_door" || id(alarm_action) == "settings_unlock");
+          then:
+            - lambda: id(alarm_action) = "";
+            - lvgl.page.show: main_lock_page
+          else:
+            - lvgl.page.show: security_page
     on_result:
       - lambda: |-
           ESP_LOGD("LVGL Keypad", "Submitted PIN: %s", x.c_str());
       - if:
           condition:
-            lambda: return (id(alarm_action) == "disarm");
+            lambda: return (id(alarm_action) == "unlock_front_door");
           then:
-            - homeassistant.service:
-                  service: alarm_control_panel.alarm_disarm
-                  data:
-                    entity_id: ${alarm_entity}
-                    code: !lambda return x.c_str();
-      - if:
-          condition:
-            lambda: return (id(alarm_action) == "armhome");
-          then:
-            - homeassistant.service:
-                  service: alarm_control_panel.alarm_arm_home
-                  data:
-                    entity_id: ${alarm_entity}
-                    code: !lambda return x.c_str();
-      - if:
-          condition:
-            lambda: return (id(alarm_action) == "armaway");
-          then:
-            - homeassistant.service:
-                  service: alarm_control_panel.alarm_arm_away
-                  data:
-                    entity_id: ${alarm_entity}
-                    code: !lambda return x.c_str();
-      - if:
-          condition:
-            lambda: return (id(alarm_action) == "armnight");
-          then:
-            - homeassistant.service:
-                  service: alarm_control_panel.alarm_arm_night
-                  data:
-                    entity_id: ${alarm_entity}
-                    code: !lambda return x.c_str();
-      - lambda: id(alarm_action) = "";
-      - script.execute: set_alarm_status
-      - lvgl.page.show: security_page
+            - if:
+                condition:
+                  lambda: return (0 == x.compare(std::string("${master_pin}")));
+                then:
+                  - homeassistant.action:
+                      action: lock.unlock
+                      data:
+                        entity_id: ${front_door_entity}
+                else:
+                  - lvgl.label.update:
+                      id: lbl_keypad_error
+                      text: "Incorrect PIN"
+                  - lvgl.widget.show: lbl_keypad_error
+            - lambda: id(alarm_action) = "";
+            - lvgl.page.show: main_lock_page
+          else:
+            - if:
+                condition:
+                  lambda: return (id(alarm_action) == "settings_unlock");
+                then:
+                  - if:
+                      condition:
+                        lambda: return (0 == x.compare(std::string("${settings_pin}")));
+                      then:
+                        - lvgl.page.show: idle_page
+                      else:
+                        - lvgl.label.update:
+                            id: lbl_keypad_error
+                            text: "Incorrect PIN"
+                        - lvgl.widget.show: lbl_keypad_error
+                        - lvgl.page.show: main_lock_page
+                  - lambda: id(alarm_action) = "";
+                else:
+                  - if:
+                      condition:
+                        lambda: return (id(alarm_action) == "disarm");
+                      then:
+                        - homeassistant.service:
+                              service: alarm_control_panel.alarm_disarm
+                              data:
+                                entity_id: ${alarm_entity}
+                                code: !lambda return x.c_str();
+                  - if:
+                      condition:
+                        lambda: return (id(alarm_action) == "armhome");
+                      then:
+                        - homeassistant.service:
+                              service: alarm_control_panel.alarm_arm_home
+                              data:
+                                entity_id: ${alarm_entity}
+                                code: !lambda return x.c_str();
+                  - if:
+                      condition:
+                        lambda: return (id(alarm_action) == "armaway");
+                      then:
+                        - homeassistant.service:
+                              service: alarm_control_panel.alarm_arm_away
+                              data:
+                                entity_id: ${alarm_entity}
+                                code: !lambda return x.c_str();
+                  - if:
+                      condition:
+                        lambda: return (id(alarm_action) == "armnight");
+                      then:
+                        - homeassistant.service:
+                              service: alarm_control_panel.alarm_arm_night
+                              data:
+                                entity_id: ${alarm_entity}
+                                code: !lambda return x.c_str();
+                  - lambda: id(alarm_action) = "";
+                  - script.execute: set_alarm_status
+                  - lvgl.page.show: security_page
                     
 ###### LVGL Display UI ######
 # All UI configuration is below. 
@@ -3959,6 +4072,118 @@ lvgl:
       then:
         - script.execute: saver_enabled
   pages:
+    - id: main_lock_page
+      skip: true
+      on_swipe_left:
+        - lambda: 'lv_indev_wait_release(lv_indev_get_act());'
+      on_swipe_right:
+        - lambda: 'lv_indev_wait_release(lv_indev_get_act());'
+      widgets:
+        - obj:
+            styles: page_content
+            widgets:
+              - button:
+                  id: but_front_door_lock
+                  width: 100%
+                  height: 100%
+                  align: CENTER
+                  bg_color: 0x330000
+                  bg_grad_color: 0x1a0000
+                  bg_grad_dir: VER
+                  bg_opa: COVER
+                  border_width: 0
+                  radius: 0
+                  shadow_width: 0
+                  widgets:
+                    - label:
+                        id: ico_front_door_lock
+                        align: CENTER
+                        y: -34
+                        text_font: icon_font_80
+                        text_color: red
+                        text: "\U000F033F"
+                    - label:
+                        id: lbl_front_door_status
+                        align: CENTER
+                        y: 40
+                        text_font: labelfont_large
+                        text_align: CENTER
+                        text_color: red
+                        text: "UNLOCKED"
+                    - label:
+                        id: lbl_front_door_action
+                        align: CENTER
+                        y: 68
+                        text_font: my_font16
+                        text_align: CENTER
+                        text_color: 0xCCCCCC
+                        text: "Tap to Lock"
+                    - label:
+                        align: TOP_MID
+                        y: 6
+                        text_font: my_font16
+                        text_align: CENTER
+                        text_color: 0xCCCCCC
+                        text: '${front_door_name}'
+                    - label:
+                        id: lbl_door_alarm_status
+                        align: TOP_MID
+                        y: 32
+                        text_font: my_font12
+                        text_align: CENTER
+                        text_color: 0xCCCCCC
+                        text: '${door_alarm_door_name}: --'
+                  on_release:
+                    then:
+                      - if:
+                          condition:
+                            lambda: return (id(front_door_item).state == "locked");
+                          then:
+                            - if:
+                                condition:
+                                  switch.is_on: front_door_require_pin
+                                then:
+                                  - lvgl.widget.hide: lbl_keypad_error
+                                  - lambda: id(alarm_action) = "unlock_front_door";
+                                  - lvgl.page.show: alarm_keypad_page
+                                else:
+                                  - homeassistant.action:
+                                      action: lock.unlock
+                                      data:
+                                        entity_id: ${front_door_entity}
+                      - if:
+                          condition:
+                            lambda: return (id(front_door_item).state == "unlocked" || id(front_door_item).state == "open");
+                          then:
+                            - homeassistant.action:
+                                action: lock.lock
+                                data:
+                                  entity_id: ${front_door_entity}
+              # ── Small settings gear — reveals all hidden pages after settings_pin ──
+              - button:
+                  id: but_lock_settings
+                  width: 44
+                  height: 44
+                  align: TOP_RIGHT
+                  x: -6
+                  y: 6
+                  bg_color: 0x000000
+                  bg_opa: 30%
+                  border_width: 0
+                  radius: 22
+                  shadow_width: 0
+                  widgets:
+                    - label:
+                        id: ico_lock_settings
+                        align: CENTER
+                        text_font: icon_font_30
+                        text_color: 0xAAAAAA
+                        text: "\U000F0493"
+                  on_release:
+                    - lvgl.widget.hide: lbl_keypad_error
+                    - lambda: id(alarm_action) = "settings_unlock";
+                    - lvgl.page.show: alarm_keypad_page
+
     - id: idle_page
       on_swipe_left:
         - lambda: 'lv_indev_wait_release(lv_indev_get_act());'
@@ -6358,6 +6583,15 @@ lvgl:
                     key_code: "#"
                     control:
                       no_repeat: true
+        - label:
+            id: lbl_keypad_error
+            hidden: true
+            text: "Incorrect PIN"
+            align: BOTTOM_MID
+            text_align: CENTER
+            text_color: red
+            text_font: my_font16
+            y: -8
                         
     - id: saver_page
       skip: true
@@ -6461,6 +6695,26 @@ lvgl:
             text_font: labelfont_large
             x: -15
             y: -15
+        - label:
+            id: lbl_saver_door_alarm_status
+            align: TOP_MID
+            text_align: CENTER
+            styles: clock_style
+            text_color: 0xCCCCCC
+            text_font: my_font12
+            x: -110
+            y: 8
+            text: 'DA: --'
+        - label:
+            id: lbl_saver_front_door_lock_door_status
+            align: TOP_MID
+            text_align: CENTER
+            styles: clock_style
+            text_color: 0xCCCCCC
+            text_font: my_font12
+            x: 85
+            y: 8
+            text: 'DS: --'
 
     - id: listening_page
       skip: true
@@ -7664,6 +7918,77 @@ lvgl:
                               text: "\U000F0502"
                         on_release:
                           - lvgl.page.show: ui_set_page
+                    - label:
+                        text: "Lock"
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                    - button:
+                        id: but_settings_6
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 3
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              id: ico_settings_6
+                              align: CENTER
+                              text_font: icon_font_55
+                              text: "\U000F033E"
+                        on_release:
+                          - lvgl.page.show: lock_set_page
+
+    - id: lock_set_page
+      skip: true
+      widgets:
+        - obj:
+            styles: page_content
+            widgets:
+              - obj:
+                  align: TOP_MID
+                  styles: header_footer 
+                  widgets:
+                    - label:
+                        text: "Lock"
+                        y: 3
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+              - obj:
+                  align: CENTER
+                  width: 100%
+                  height: ${page_content_height}
+                  pad_all: 6
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    pad_row: 6
+                    pad_column: 8
+                    type: GRID
+                    grid_columns: [FR(1), FR(1)]
+                    grid_rows: [FR(25), FR(25), FR(25), FR(25)]
+                  widgets:
+                    - checkbox:
+                        id: chk_front_door_pin
+                        text: "Require PIN to Unlock"
+                        align: LEFT_MID
+                        text_align: LEFT
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                        on_change:
+                          switch.toggle: front_door_require_pin
 
     - id: voice_set_page
       skip: true
@@ -9551,6 +9876,36 @@ lvgl:
       text_align: CENTER
 
 binary_sensor:
+  # ── Front Door Lock Screen — door status sensors ──────────────────────────
+  - platform: homeassistant
+    id: door_alarm_door_item
+    entity_id: ${door_alarm_door_entity}
+    internal: true
+    trigger_on_initial_state: true
+    on_state:
+      then:
+        - if:
+            condition:
+              lambda: return x;
+            then:
+              - lvgl.label.update:
+                  id: lbl_door_alarm_status
+                  text_color: amber
+                  text: '${door_alarm_door_name}: Open'
+              - lvgl.label.update:
+                  id: lbl_saver_door_alarm_status
+                  text_color: amber
+                  text: 'DA: Open'
+            else:
+              - lvgl.label.update:
+                  id: lbl_door_alarm_status
+                  text_color: 0xCCCCCC
+                  text: '${door_alarm_door_name}: Closed'
+              - lvgl.label.update:
+                  id: lbl_saver_door_alarm_status
+                  text_color: 0xCCCCCC
+                  text: 'DA: Closed'
+
   # side physical button
   - platform: gpio
     pin:
