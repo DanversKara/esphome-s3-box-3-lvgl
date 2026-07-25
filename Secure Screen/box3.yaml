@@ -146,7 +146,7 @@ substitutions:
   # ── CCTV Camera Page ──────────────────────────────────────────────────────
   cctv_page_title: ""
   cctv_camera_entity: camera.frontdoor  ## ← change to your HA camera entity id
-  cctv_snapshot_url: "http://ash:466911Zoey@192.168.8.246:8080/shot.jpg?width=352&height=288"  ## ← IP Webcam URL
+  cctv_snapshot_url: "http://user:password@192.168.8.246:8080/photo.jpg"  ## ← IP Webcam URL
 
   # ── Page 2 (second swipe page) ────────────────────────────────────────────
   page2_title: "More"  ## ← title for second icon page
@@ -3969,7 +3969,7 @@ key_collector:
     on_timeout:
       - if:
           condition:
-            lambda: return (id(alarm_action) == "unlock_front_door" || id(alarm_action) == "settings_unlock");
+            lambda: return (id(alarm_action) == "unlock_front_door" || id(alarm_action) == "settings_unlock" || id(alarm_action) == "view_wifi" || id(alarm_action) == "view_alarmclock");
           then:
             - lambda: id(alarm_action) = "";
             - lvgl.page.show: main_lock_page
@@ -4017,43 +4017,77 @@ key_collector:
                 else:
                   - if:
                       condition:
-                        lambda: return (id(alarm_action) == "disarm");
+                        lambda: return (id(alarm_action) == "view_wifi");
                       then:
-                        - homeassistant.service:
-                              service: alarm_control_panel.alarm_disarm
-                              data:
-                                entity_id: ${alarm_entity}
-                                code: !lambda return x.c_str();
-                  - if:
-                      condition:
-                        lambda: return (id(alarm_action) == "armhome");
-                      then:
-                        - homeassistant.service:
-                              service: alarm_control_panel.alarm_arm_home
-                              data:
-                                entity_id: ${alarm_entity}
-                                code: !lambda return x.c_str();
-                  - if:
-                      condition:
-                        lambda: return (id(alarm_action) == "armaway");
-                      then:
-                        - homeassistant.service:
-                              service: alarm_control_panel.alarm_arm_away
-                              data:
-                                entity_id: ${alarm_entity}
-                                code: !lambda return x.c_str();
-                  - if:
-                      condition:
-                        lambda: return (id(alarm_action) == "armnight");
-                      then:
-                        - homeassistant.service:
-                              service: alarm_control_panel.alarm_arm_night
-                              data:
-                                entity_id: ${alarm_entity}
-                                code: !lambda return x.c_str();
-                  - lambda: id(alarm_action) = "";
-                  - script.execute: set_alarm_status
-                  - lvgl.page.show: security_page
+                        - if:
+                            condition:
+                              lambda: return (0 == x.compare(std::string("${settings_pin}")));
+                            then:
+                              - lvgl.page.show: wifi_page
+                            else:
+                              - lvgl.label.update:
+                                  id: lbl_keypad_error
+                                  text: "Incorrect PIN"
+                              - lvgl.widget.show: lbl_keypad_error
+                              - lvgl.page.show: main_lock_page
+                        - lambda: id(alarm_action) = "";
+                      else:
+                        - if:
+                            condition:
+                              lambda: return (id(alarm_action) == "view_alarmclock");
+                            then:
+                              - if:
+                                  condition:
+                                    lambda: return (0 == x.compare(std::string("${settings_pin}")));
+                                  then:
+                                    - lvgl.page.show: alarmclock_page
+                                  else:
+                                    - lvgl.label.update:
+                                        id: lbl_keypad_error
+                                        text: "Incorrect PIN"
+                                    - lvgl.widget.show: lbl_keypad_error
+                                    - lvgl.page.show: main_lock_page
+                              - lambda: id(alarm_action) = "";
+                            else:
+                              - if:
+                                  condition:
+                                    lambda: return (id(alarm_action) == "disarm");
+                                  then:
+                                    - homeassistant.service:
+                                          service: alarm_control_panel.alarm_disarm
+                                          data:
+                                            entity_id: ${alarm_entity}
+                                            code: !lambda return x.c_str();
+                              - if:
+                                  condition:
+                                    lambda: return (id(alarm_action) == "armhome");
+                                  then:
+                                    - homeassistant.service:
+                                          service: alarm_control_panel.alarm_arm_home
+                                          data:
+                                            entity_id: ${alarm_entity}
+                                            code: !lambda return x.c_str();
+                              - if:
+                                  condition:
+                                    lambda: return (id(alarm_action) == "armaway");
+                                  then:
+                                    - homeassistant.service:
+                                          service: alarm_control_panel.alarm_arm_away
+                                          data:
+                                            entity_id: ${alarm_entity}
+                                            code: !lambda return x.c_str();
+                              - if:
+                                  condition:
+                                    lambda: return (id(alarm_action) == "armnight");
+                                  then:
+                                    - homeassistant.service:
+                                          service: alarm_control_panel.alarm_arm_night
+                                          data:
+                                            entity_id: ${alarm_entity}
+                                            code: !lambda return x.c_str();
+                              - lambda: id(alarm_action) = "";
+                              - script.execute: set_alarm_status
+                              - lvgl.page.show: security_page
                     
 ###### LVGL Display UI ######
 # All UI configuration is below. 
@@ -9557,7 +9591,9 @@ lvgl:
                       text: " "
                       on_release:
                         then:
-                          lvgl.page.show: alarmclock_page
+                          - lvgl.widget.hide: lbl_keypad_error
+                          - lambda: id(alarm_action) = "view_alarmclock";
+                          - lvgl.page.show: alarm_keypad_page
                   - label:
                       id: lbl_alarmclock
                       hidden: true
@@ -9610,7 +9646,9 @@ lvgl:
                       text: "\uF1EB"
                       on_release:
                         then:
-                          lvgl.page.show: wifi_page
+                          - lvgl.widget.hide: lbl_keypad_error
+                          - lambda: id(alarm_action) = "view_wifi";
+                          - lvgl.page.show: alarm_keypad_page
                   - label:
                       id: lbl_api
                       hidden: true

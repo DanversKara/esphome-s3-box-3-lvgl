@@ -138,7 +138,7 @@ substitutions:
   # ── CCTV Camera Page ──────────────────────────────────────────────────────
   cctv_page_title: ""
   cctv_camera_entity: camera.frontdoor  ## ← change to your HA camera entity id
-  cctv_snapshot_url: "http://user:pass@192.168.1.120:8080/shot.jpg?width=352&height=288"  ## ← IP Webcam URL
+  cctv_snapshot_url: "http://user:pass@192.168.8.246:8080/photo.jpg"  ## ← IP Webcam URL
 
   # ── Page 2 (second swipe page) ────────────────────────────────────────────
   page2_title: "More"  ## ← title for second icon page
