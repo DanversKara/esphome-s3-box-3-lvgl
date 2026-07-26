@@ -116,11 +116,11 @@ substitutions:
   keypad_page_title: "Code"
 
   # ── Front Door Lock Screen ────────────────────────────────────────────────
-  front_door_name: "Front Door"
+  front_door_name: ""
   front_door_entity: lock.front_door_lock  ## ← change to your front door lock entity id
   settings_pin: !secret settings_pin  ## PIN required to reveal all hidden pages/settings menu
   master_pin: !secret master_pin  ## PIN required to unlock the front door from the lock screen
-  door_alarm_door_name: "Door Status"
+  door_alarm_door_name: "STATUS"
   door_alarm_door_entity: binary_sensor.door_alarm_door  ## ← change if your entity id differs
   screensaver_page_title: " "
   screensaver_weather_entity: weather.home #weather
@@ -452,11 +452,15 @@ api:
   encryption:
     key: ${api_key}
   on_client_connected:
-    - lambda: id(api_connection) = true;
+    - lambda: |-
+        id(api_fail_count) = 0;
+        id(api_connection) = true;
     - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
     - script.execute: draw_display
   on_client_disconnected:
-    - lambda: id(api_connection) = false;
+    - lambda: |-
+        id(api_fail_count) = 0;
+        id(api_connection) = false;
     - script.execute: draw_display
 
 ota:
@@ -492,17 +496,30 @@ interval:
           condition:
             api.connected:
           then:
-            - lambda: id(api_connection) = true;
+            - lambda: |-
+                id(api_fail_count) = 0;
+                id(api_connection) = true;
           else:
-            - lambda: id(api_connection) = false;
-            # Force the no-connection page back on top immediately, in case
-            # something else (radar/presence, notifications, timers, etc.)
-            # showed the lock screen in between checks.
-            - lvgl.widget.hide: lbl_api
-            - lvgl.widget.hide: lbl_wifi
-            - lvgl.widget.hide: boot_screen
-            - lvgl.widget.hide: topbar_container
-            - lvgl.page.show: no_connection_page
+            - lambda: id(api_fail_count) += 1;
+            - if:
+                # Require a few consecutive failed checks before acting, so a
+                # single momentary blip doesn't flash NO CONNECTION. This is a
+                # local state check (api.connected), not a network ping, so it
+                # doesn't add any extra traffic on its own — but a genuinely
+                # flaky WiFi/AP will still legitimately reconnect a lot, which
+                # is worth investigating separately if this keeps firing.
+                condition:
+                  lambda: return id(api_fail_count) >= 3;
+                then:
+                  - lambda: id(api_connection) = false;
+                  # Force the no-connection page back on top immediately, in case
+                  # something else (radar/presence, notifications, timers, etc.)
+                  # showed the lock screen in between checks.
+                  - lvgl.widget.hide: lbl_api
+                  - lvgl.widget.hide: lbl_wifi
+                  - lvgl.widget.hide: boot_screen
+                  - lvgl.widget.hide: topbar_container
+                  - lvgl.page.show: no_connection_page
       - if:
           condition:
             - lambda: return !(id(ethernet_connection) || id(wifi_connection));
@@ -3055,6 +3072,10 @@ globals:
     type: bool
     restore_value: false
     initial_value: "false"
+  - id: api_fail_count
+    type: int
+    restore_value: false
+    initial_value: "0"
   - id: mute_value
     type: bool
     restore_value: false
