@@ -146,7 +146,7 @@ substitutions:
   # ── CCTV Camera Page ──────────────────────────────────────────────────────
   cctv_page_title: ""
   cctv_camera_entity: camera.frontdoor  ## ← change to your HA camera entity id
-  cctv_snapshot_url: "http://user:pass@192.168.8.246:8080/photoaf.jpg"  ## ← IP Webcam URL
+  cctv_snapshot_url: "http://ash:466911Zoey@192.168.8.246:8080/photoaf.jpg"  ## ← IP Webcam URL
 
   # ── Page 2 (second swipe page) ────────────────────────────────────────────
   page2_title: "More"  ## ← title for second icon page
@@ -10471,8 +10471,72 @@ binary_sensor:
           condition:
             - lvgl.page.is_showing: ${default_page}
           then:
-            - script.execute: saver_enabled
+            # Front door lock screen: always raise the keypad — this hardware
+            # button is a deliberate manual PIN-entry shortcut, regardless of
+            # the "Require PIN to unlock" switch.
+            - lvgl.widget.hide: lbl_keypad_error
+            - lambda: id(alarm_action) = "unlock_front_door";
+            - lvgl.page.show: alarm_keypad_page
           else:
+            - if:
+                # Settings home — back out to the lock screen entirely.
+                condition:
+                  lvgl.page.is_showing: idle_page
+                then:
+                  - lvgl.page.show: main_lock_page
+                else:
+                  - if:
+                      # Studio AC detail — back to the climate list.
+                      condition:
+                        lvgl.page.is_showing: climate_studio_page
+                      then:
+                        - lvgl.page.show: climate_page
+                      else:
+                        - if:
+                            # Screensaver sub-settings — back to the screensaver page.
+                            condition:
+                              lvgl.page.is_showing: timeout_settings_page
+                            then:
+                              - lvgl.page.show: ss_set_page
+                            else:
+                              - if:
+                                  # Leaf pages under the Settings hub.
+                                  condition:
+                                    or:
+                                      - lvgl.page.is_showing: lock_set_page
+                                      - lvgl.page.is_showing: voice_set_page
+                                      - lvgl.page.is_showing: ss_set_page
+                                      - lvgl.page.is_showing: info_page
+                                      - lvgl.page.is_showing: device_set_page
+                                      - lvgl.page.is_showing: ui_set_page
+                                  then:
+                                    - lvgl.page.show: lights_widget_page
+                                  else:
+                                    - if:
+                                        # Everything else in the settings area — back to settings home.
+                                        condition:
+                                          or:
+                                            - lvgl.page.is_showing: page2
+                                            - lvgl.page.is_showing: climate_page
+                                            - lvgl.page.is_showing: lights_page
+                                            - lvgl.page.is_showing: controls_page
+                                            - lvgl.page.is_showing: media_page
+                                            - lvgl.page.is_showing: scenes_page
+                                            - lvgl.page.is_showing: security_page
+                                            - lvgl.page.is_showing: s3box_sensors_page
+                                            - lvgl.page.is_showing: cctv_page
+                                            - lvgl.page.is_showing: liv_lite_page
+                                            - lvgl.page.is_showing: lights_widget_page
+                                            - lvgl.page.is_showing: wifi_page
+                                            - lvgl.page.is_showing: alarmclock_page
+                                            - lvgl.page.is_showing: set_timer_page
+                                        then:
+                                          - lvgl.page.show: idle_page
+                                        else:
+                                          # Not a settings page (screensaver, voice popups,
+                                          # notifications, etc.) — keep the original wake/refresh.
+                                          - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
+                                          - script.execute: draw_display
             - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
             - script.execute: draw_display
 
