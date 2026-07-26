@@ -146,7 +146,7 @@ substitutions:
   # ── CCTV Camera Page ──────────────────────────────────────────────────────
   cctv_page_title: ""
   cctv_camera_entity: camera.frontdoor  ## ← change to your HA camera entity id
-  cctv_snapshot_url: "http://user:password@192.168.8.246:8080/photoaf.jpg"  ## ← IP Webcam URL
+  cctv_snapshot_url: "http://user:password@192.168.8.246:8080/photo.jpg"  ## ← IP Webcam URL
 
   # ── Page 2 (second swipe page) ────────────────────────────────────────────
   page2_title: "More"  ## ← title for second icon page
@@ -486,7 +486,7 @@ interval:
   - interval: 150ms
     then:
       - script.execute: no_connection_glitch_tick
-  - interval: 15s #requires WIFI
+  - interval: 2s #requires WIFI
     then:
       - if:
           condition:
@@ -495,6 +495,23 @@ interval:
             - lambda: id(api_connection) = true;
           else:
             - lambda: id(api_connection) = false;
+            # Force the no-connection page back on top immediately, in case
+            # something else (radar/presence, notifications, timers, etc.)
+            # showed the lock screen in between checks.
+            - lvgl.widget.hide: lbl_api
+            - lvgl.widget.hide: lbl_wifi
+            - lvgl.widget.hide: boot_screen
+            - lvgl.widget.hide: topbar_container
+            - lvgl.page.show: no_connection_page
+      - if:
+          condition:
+            - lambda: return !(id(ethernet_connection) || id(wifi_connection));
+          then:
+            - lvgl.widget.hide: lbl_api
+            - lvgl.widget.hide: lbl_wifi
+            - lvgl.widget.hide: boot_screen
+            - lvgl.widget.hide: topbar_container
+            - lvgl.page.show: no_connection_page
       - script.execute: draw_display
       - if: #requires WIFI
           condition:
@@ -1028,7 +1045,6 @@ media_player:
   - platform: speaker
     name: Media Player
     id: speaker_media_player
-    codec_support_enabled: true
     # buffer_size: 2000000
     task_stack_in_psram: true
     volume_increment: 0.05
@@ -3072,10 +3088,11 @@ http_request:
   timeout: 30s
   watchdog_timeout: 60s
 
-# online_image: only cctv_image restored - online_png_image stays removed
-online_image:
+# image: platform: online_image (migrated from deprecated top-level online_image:) - only cctv_image restored - online_png_image stays removed
+image:
   ## CCTV Camera Image - fetches JPEG snapshot from IP camera
-  - url: ${cctv_snapshot_url}
+  - platform: online_image
+    url: ${cctv_snapshot_url}
     format: jpeg
     resize: ${image_resize}
     type: RGB565
@@ -10179,8 +10196,8 @@ lvgl:
       radius: 14
       shadow_color: 0x000000
       shadow_width: 8
-      shadow_ofs_x: 2
-      shadow_ofs_y: 2
+      shadow_offset_x: 2
+      shadow_offset_y: 2
       shadow_opa: 40%
       pad_all: 4
 
@@ -10402,6 +10419,8 @@ binary_sensor:
               - lambda: "return x;"
               - switch.is_on: s_saver
               - switch.is_on: s_saver_presc
+              - lambda: return id(wifi_connection) || id(ethernet_connection);
+              - lambda: return id(api_connection);
           then:
             - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
             - lvgl.page.show: ${default_page}
