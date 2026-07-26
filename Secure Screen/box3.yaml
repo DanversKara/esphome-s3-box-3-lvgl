@@ -486,7 +486,7 @@ interval:
   - interval: 150ms
     then:
       - script.execute: no_connection_glitch_tick
-  - interval: 2s #requires WIFI
+  - interval: 2s #requires WIFI - fast disconnect detection only
     then:
       - if:
           condition:
@@ -512,6 +512,15 @@ interval:
             - lvgl.widget.hide: boot_screen
             - lvgl.widget.hide: topbar_container
             - lvgl.page.show: no_connection_page
+      # NOTE: draw_display is intentionally NOT called here. draw_display also
+      # forces the lock screen back up (settings-menu auto-relock) whenever the
+      # voice assistant is idle, so calling it every 2s would relock the
+      # settings menu after 2 seconds instead of the original ~15s. It's
+      # called from the slower interval below instead, and from all the normal
+      # event triggers (api/wifi connect/disconnect, timers, voice assistant, etc).
+
+  - interval: 15s #requires WIFI - periodic display refresh / settings auto-relock
+    then:
       - script.execute: draw_display
       - if: #requires WIFI
           condition:
@@ -1501,6 +1510,28 @@ script:
                                   - lvgl.page.is_showing: notification_page
                                   - lvgl.page.is_showing: image_page
                                   - lvgl.page.is_showing: alarm_keypad_page
+                                  - lvgl.page.is_showing: idle_page
+                                  - lvgl.page.is_showing: climate_page
+                                  - lvgl.page.is_showing: climate_studio_page
+                                  - lvgl.page.is_showing: lights_page
+                                  - lvgl.page.is_showing: controls_page
+                                  - lvgl.page.is_showing: media_page
+                                  - lvgl.page.is_showing: scenes_page
+                                  - lvgl.page.is_showing: security_page
+                                  - lvgl.page.is_showing: s3box_sensors_page
+                                  - lvgl.page.is_showing: cctv_page
+                                  - lvgl.page.is_showing: liv_lite_page
+                                  - lvgl.page.is_showing: lights_widget_page
+                                  - lvgl.page.is_showing: lock_set_page
+                                  - lvgl.page.is_showing: voice_set_page
+                                  - lvgl.page.is_showing: ss_set_page
+                                  - lvgl.page.is_showing: timeout_settings_page
+                                  - lvgl.page.is_showing: info_page
+                                  - lvgl.page.is_showing: device_set_page
+                                  - lvgl.page.is_showing: ui_set_page
+                                  - lvgl.page.is_showing: wifi_page
+                                  - lvgl.page.is_showing: alarmclock_page
+                                  - lvgl.page.is_showing: set_timer_page
                                   - lvgl.page.is_showing: time_remaining_page
                                   - lvgl.page.is_showing: timer_finished_page
                             then:
@@ -4370,6 +4401,28 @@ lvgl:
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
+              # ── Exit settings — deliberate manual return to the lock screen ──
+              - button:
+                  id: but_exit_settings
+                  width: 44
+                  height: 44
+                  align: TOP_RIGHT
+                  x: -6
+                  y: 6
+                  bg_color: 0x000000
+                  bg_opa: 30%
+                  border_width: 0
+                  radius: 22
+                  shadow_width: 0
+                  widgets:
+                    - label:
+                        id: ico_exit_settings
+                        align: CENTER
+                        text_font: icon_font_30
+                        text_color: 0xAAAAAA
+                        text: "\U000F033E"
+                  on_release:
+                    - lvgl.page.show: main_lock_page
               # ── Icon card grid ─────────────────────────────────────────
               - obj:
                   align: CENTER
