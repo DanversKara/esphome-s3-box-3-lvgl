@@ -490,6 +490,7 @@ interval:
   - interval: 150ms
     then:
       - script.execute: no_connection_glitch_tick
+      - script.execute: boot_glitch_tick
   - interval: 2s #requires WIFI - fast disconnect detection only
     then:
       - if:
@@ -509,7 +510,9 @@ interval:
                 # flaky WiFi/AP will still legitimately reconnect a lot, which
                 # is worth investigating separately if this keeps firing.
                 condition:
-                  lambda: return id(api_fail_count) >= 3;
+                  and:
+                    - lambda: return id(api_fail_count) >= 3;
+                    - lambda: return !id(init_in_progress);
                 then:
                   - lambda: id(api_connection) = false;
                   # Force the no-connection page back on top immediately, in case
@@ -522,7 +525,9 @@ interval:
                   - lvgl.page.show: no_connection_page
       - if:
           condition:
-            - lambda: return !(id(ethernet_connection) || id(wifi_connection));
+            and:
+              - lambda: return !(id(ethernet_connection) || id(wifi_connection));
+              - lambda: return !id(init_in_progress);
           then:
             - lvgl.widget.hide: lbl_api
             - lvgl.widget.hide: lbl_wifi
@@ -1727,6 +1732,93 @@ script:
                   char b[2] = { cs[rand() % (sizeof(cs)-1)], 0 }; return std::string(b);
                 text_color: !lambda |-
                   return (rand() % 4 == 0) ? Color(0x20FC30) : Color(0x0B5D16);
+
+  - id: boot_glitch_tick
+    then:
+      - if:
+          condition:
+            lambda: return id(init_in_progress);
+          then:
+            - lvgl.widget.update:
+                id: boot_glow
+                bg_opa: !lambda |-
+                  static int opa = 18; static int dir = 1;
+                  opa += dir * 2;
+                  if (opa > 32) { opa = 32; dir = -1; }
+                  if (opa < 12) { opa = 12; dir = 1; }
+                  return opa;
+            - lvgl.label.update:
+                id: boot_rain_col_1
+                y: !lambda |-
+                  static int y = 0; y += 16; if (y > 230) y = -16; return y;
+                text: !lambda |-
+                  static const char cs[] = "01ABCDEFHKMXZ$#%&*+=<>/";
+                  char b[2] = { cs[rand() % (sizeof(cs)-1)], 0 }; return std::string(b);
+                text_color: !lambda |-
+                  return (rand() % 5 == 0) ? Color(0x20FC30) : Color(0x0B5D16);
+            - lvgl.label.update:
+                id: boot_rain_col_2
+                y: !lambda |-
+                  static int y = 80; y += 16; if (y > 230) y = -16; return y;
+                text: !lambda |-
+                  static const char cs[] = "01ABCDEFHKMXZ$#%&*+=<>/";
+                  char b[2] = { cs[rand() % (sizeof(cs)-1)], 0 }; return std::string(b);
+                text_color: !lambda |-
+                  return (rand() % 5 == 0) ? Color(0x20FC30) : Color(0x0B5D16);
+            - lvgl.label.update:
+                id: boot_rain_col_3
+                y: !lambda |-
+                  static int y = 30; y += 16; if (y > 230) y = -16; return y;
+                text: !lambda |-
+                  static const char cs[] = "01ABCDEFHKMXZ$#%&*+=<>/";
+                  char b[2] = { cs[rand() % (sizeof(cs)-1)], 0 }; return std::string(b);
+                text_color: !lambda |-
+                  return (rand() % 5 == 0) ? Color(0x20FC30) : Color(0x0B5D16);
+            - lvgl.label.update:
+                id: boot_rain_col_4
+                y: !lambda |-
+                  static int y = 120; y += 16; if (y > 230) y = -16; return y;
+                text: !lambda |-
+                  static const char cs[] = "01ABCDEFHKMXZ$#%&*+=<>/";
+                  char b[2] = { cs[rand() % (sizeof(cs)-1)], 0 }; return std::string(b);
+                text_color: !lambda |-
+                  return (rand() % 5 == 0) ? Color(0x20FC30) : Color(0x0B5D16);
+            - lvgl.label.update:
+                id: boot_rain_col_5
+                y: !lambda |-
+                  static int y = 50; y += 16; if (y > 230) y = -16; return y;
+                text: !lambda |-
+                  static const char cs[] = "01ABCDEFHKMXZ$#%&*+=<>/";
+                  char b[2] = { cs[rand() % (sizeof(cs)-1)], 0 }; return std::string(b);
+                text_color: !lambda |-
+                  return (rand() % 5 == 0) ? Color(0x20FC30) : Color(0x0B5D16);
+            - lvgl.label.update:
+                id: boot_rain_col_6
+                y: !lambda |-
+                  static int y = 150; y += 16; if (y > 230) y = -16; return y;
+                text: !lambda |-
+                  static const char cs[] = "01ABCDEFHKMXZ$#%&*+=<>/";
+                  char b[2] = { cs[rand() % (sizeof(cs)-1)], 0 }; return std::string(b);
+                text_color: !lambda |-
+                  return (rand() % 5 == 0) ? Color(0x20FC30) : Color(0x0B5D16);
+            - lvgl.label.update:
+                id: boot_rain_col_7
+                y: !lambda |-
+                  static int y = 15; y += 16; if (y > 230) y = -16; return y;
+                text: !lambda |-
+                  static const char cs[] = "01ABCDEFHKMXZ$#%&*+=<>/";
+                  char b[2] = { cs[rand() % (sizeof(cs)-1)], 0 }; return std::string(b);
+                text_color: !lambda |-
+                  return (rand() % 5 == 0) ? Color(0x20FC30) : Color(0x0B5D16);
+            - lvgl.label.update:
+                id: boot_rain_col_8
+                y: !lambda |-
+                  static int y = 100; y += 16; if (y > 230) y = -16; return y;
+                text: !lambda |-
+                  static const char cs[] = "01ABCDEFHKMXZ$#%&*+=<>/";
+                  char b[2] = { cs[rand() % (sizeof(cs)-1)], 0 }; return std::string(b);
+                text_color: !lambda |-
+                  return (rand() % 5 == 0) ? Color(0x20FC30) : Color(0x0B5D16);
 
   - id: fetch_first_active_timer
     then:
@@ -10019,18 +10111,97 @@ lvgl:
           pad_all: 0
           border_width: 0
           widgets:
+            # ── matrix-style digital rain background ──────────────────────
             - label:
+                id: boot_rain_col_1
+                align: TOP_LEFT
+                x: 4
+                y: 0
+                text_font: my_font16
+                text_color: 0x0B5D16
+                text: "0"
+            - label:
+                id: boot_rain_col_2
+                align: TOP_LEFT
+                x: 44
+                y: 80
+                text_font: my_font16
+                text_color: 0x0B5D16
+                text: "1"
+            - label:
+                id: boot_rain_col_3
+                align: TOP_LEFT
+                x: 84
+                y: 30
+                text_font: my_font16
+                text_color: 0x0B5D16
+                text: "A"
+            - label:
+                id: boot_rain_col_4
+                align: TOP_LEFT
+                x: 124
+                y: 120
+                text_font: my_font16
+                text_color: 0x0B5D16
+                text: "F"
+            - label:
+                id: boot_rain_col_5
+                align: TOP_LEFT
+                x: 164
+                y: 50
+                text_font: my_font16
+                text_color: 0x0B5D16
+                text: "X"
+            - label:
+                id: boot_rain_col_6
+                align: TOP_LEFT
+                x: 204
+                y: 150
+                text_font: my_font16
+                text_color: 0x0B5D16
+                text: "%"
+            - label:
+                id: boot_rain_col_7
+                align: TOP_LEFT
+                x: 244
+                y: 15
+                text_font: my_font16
+                text_color: 0x0B5D16
+                text: "K"
+            - label:
+                id: boot_rain_col_8
+                align: TOP_LEFT
+                x: 284
+                y: 100
+                text_font: my_font16
+                text_color: 0x0B5D16
+                text: "$"
+            # ── soft glow that pulses behind the title, like a light
+            #    slowly entering the room as the device wakes up ─────────
+            - obj:
+                id: boot_glow
+                align: CENTER
+                y: -20
+                width: 160
+                height: 160
+                radius: 999
+                bg_color: 0x20FC30
+                bg_opa: 20%
+                border_width: 0
+                shadow_width: 0
+            - label:
+                id: boot_title
                 align: CENTER
                 y: -20
                 text_align: CENTER
-                text_color: 0x18bcf2
+                text_color: 0xFFFFFF
                 text_font: montserrat_48
                 text: "BOOTING"
             - label:
                 align: CENTER
                 y: 30
                 text_align: CENTER
-                text_color: 0xAAAAAA
+                text_color: 0x22CC33
                 text_font: my_font
                 text: "Starting up..."
             - spinner:
@@ -10042,7 +10213,7 @@ lvgl:
                 arc_length: 60deg
                 arc_width: 8
                 indicator:
-                  arc_color: 0x18bcf2
+                  arc_color: 0x20FC30
                   arc_width: 8
           on_release:
             - lvgl.widget.hide: boot_screen
