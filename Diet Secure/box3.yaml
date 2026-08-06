@@ -1,0 +1,4092 @@
+substitutions:
+  name: esp32-s3box-3
+  friendly_name: ESP32-S3-Box-3
+
+###### Your Configuration Data ######
+  # change this to your external media player entity_id: do not include media_player.
+  external_media_player: living_room_speaker
+  
+  # change to the full url or IP of your HA server including port
+  home_assistant_host: http://192.168.8.162:8123
+  
+  # Device specific API KEY
+  api_key: QhTgdqqJ3XY9DbDuN8NS1+zXUr8NaY83pab4dqgy8Yk=
+  
+  wifi_fallback_pwd: s3box123
+  climate_page_title: "Climate"
+  climate1_name: "Room 1 AC"
+  climate1_entity: climate.air_conditioner #climate
+  climate2_name: "Room 2"
+  climate2_entity: sensor.temperature2 #sensor
+  climate3_name: "Room 3"
+  climate3_entity: sensor.temperature3 #sensor
+  climate4_name: "Room 4"
+  climate4_entity: sensor.temperature4 #sensor
+  climate5_name: "Room 5"
+  climate5_entity: sensor.temperature5 #sensor
+  climate6_name: "Room 6"
+  climate6_entity: sensor.temperature6 #sensor
+  lights_page_title: "Lights"
+  lights1_name: "LIV LITE"
+  lights1_entity: light.color_light
+  lights2_name: "Light 2"
+  lights2_entity: switch.light2
+  lights3_name: "Light 3"
+  lights3_entity: light.light3
+  lights4_name: "Light 4"
+  lights4_entity: switch.light4
+  lights5_name: "Light 5"
+  lights5_entity: switch.light5
+  lights6_name: "Light 6"
+  lights6_entity: light.light6
+  controls_page_title: "Controls"
+  controls_page_icon: "\U000F097E" #icon from icon_glyphs
+  controls1_name: "Kettle"
+  controls1_entity: switch.kettle_start
+  controls1_icon_off: "\U000F131B" #icon from icon_glyphs
+  controls1_icon_on: "\U000F05FA" #icon from icon_glyphs
+  controls2_name: "Control 2"
+  controls2_entity: switch.switch2
+  controls2_icon_off: "\U000F097E" #icon from icon_glyphs
+  controls2_icon_on: "\U000F097E" #icon from icon_glyphs
+  controls3_name: "Control 3"
+  controls3_entity: switch.switch3
+  controls3_icon_off: "\U000F097E" #icon from icon_glyphs
+  controls3_icon_on: "\U000F097E" #icon from icon_glyphs
+  controls4_name: "Garage"
+  controls4_entity: switch.garagedoorbutton
+  controls4_state: binary_sensor.garagedoorstate
+  controls4_icon_off: "\U000F12D3" #icon from icon_glyphs
+  controls4_icon_on: "\U000F12D4" #icon from icon_glyphs
+  controls5_name: "Dishwasher"
+  controls5_entity: input_boolean.dishwasher
+  controls5_state: input_boolean.dishwasher
+  controls5_icon_off: "\U000F0AAC" #icon from icon_glyphs
+  controls5_icon_on: "\U000F11B8" #icon from icon_glyphs
+  controls6_name: "Vacuum"
+  controls6_entity: input_boolean.vacuum
+  controls6_state: input_boolean.vacuum
+  controls6_icon_off: "\U000F1C01" #icon from icon_glyphs
+  controls6_icon_on: "\U000F070D" #icon from icon_glyphs
+  media_page_title: "Media"
+  scenes_page_title: "Screens"
+  scenes_page_icon: "\U000F0FCE" #icon from icon_glyphs
+  scenes1_name: "Player 1"
+  scenes1_entity: media_player.media1
+  scenes1_icon_off: "\U000F083B" #icon from icon_glyphs
+  scenes1_icon_on: "\U000F0502" #icon from icon_glyphs
+  scenes2_name: "Player 2"
+  scenes2_entity: media_player.media2
+  scenes2_icon_off: "\U000F083B" #icon from icon_glyphs
+  scenes2_icon_on: "\U000F0502" #icon from icon_glyphs
+  scenes3_name: "Player 3"
+  scenes3_entity: media_player.media3
+  scenes3_icon_off: "\U000F083B" #icon from icon_glyphs
+  scenes3_icon_on: "\U000F0502" #icon from icon_glyphs
+  scenes4_name: "Player 4"
+  scenes4_entity: media_player.media4
+  scenes4_icon_off: "\U000F083B" #icon from icon_glyphs
+  scenes4_icon_on: "\U000F0502" #icon from icon_glyphs
+  scenes5_name: "Player 5"
+  scenes5_entity: media_player.media5
+  scenes5_icon_off: "\U000F083B" #icon from icon_glyphs
+  scenes5_icon_on: "\U000F0502" #icon from icon_glyphs
+  scenes6_name: "Player 6"
+  scenes6_entity: media_player.media6
+  scenes6_icon_off: "\U000F083B" #icon from icon_glyphs
+  scenes6_icon_on: "\U000F0502" #icon from icon_glyphs
+  alarm_entity: alarm_control_panel.alarmo #Alarm - tested with Alarmo
+  alarm_background_on: 0x001a00 #Set to 0x000000 to disable
+  alarm_background_pending: 0x330d00 #Set to 0x000000 to disable
+  alarm_background_triggered: 0x4d0000 #Set to 0x000000 to disable
+  security_page_title: "Security"
+  security1_name: "Lock 1"
+  security1_entity: lock.lock1
+  security1_icon_off: "\U000F033F" #icon from icon_glyphs
+  security1_icon_on: "\U000F033E" #icon from icon_glyphs
+  security2_name: "Lock 2"
+  security2_entity: lock.lock2
+  security2_icon_off: "\U000F033F" #icon from icon_glyphs
+  security2_icon_on: "\U000F033E" #icon from icon_glyphs
+  security3_name: "Lock 3"
+  security3_entity: lock.lock3
+  security3_icon_off: "\U000F033F" #icon from icon_glyphs
+  security3_icon_on: "\U000F033E" #icon from icon_glyphs
+  keypad_page_title: "Code"
+
+  # ── Front Door Lock Screen ────────────────────────────────────────────────
+  front_door_name: ""
+  front_door_entity: lock.front_door_lock  ## ← change to your front door lock entity id
+  settings_pin: !secret settings_pin  ## PIN required to reveal all hidden pages/settings menu
+  master_pin: !secret master_pin  ## PIN required to unlock the front door from the lock screen
+  door_alarm_door_name: "STATUS"
+  door_alarm_door_entity: binary_sensor.door_alarm_door  ## ← change if your entity id differs
+  screensaver_page_title: " "
+  screensaver_weather_entity: weather.home #weather
+  screensaver_weather_dp: 1 #decimal places for weather temperature
+  screensaver_temperature_entity: sensor.temperature #temperature sensor for local room
+  screensaver_temperature_dp: 1 #decimal places for temperature entity
+  screensaver_humidity_entity: sensor.humidity #humidity sensor for local room
+  screensaver_humidity_dp: 0 #decimal places for humidity entity
+  screensaver_lower_left_entity: sensor.airquality #sensor
+  screensaver_lower_left_dp: 0 #decimal places for lower left entity
+  screensaver_lower_left_units: " μg"
+  screensaver_lower_right_entity: sensor.allergen_index #sensor
+  screensaver_lower_right_dp: 0 #decimal places for lower right entity
+  screensaver_lower_right_units: " IAI"
+  notification_page_title: "Notification"
+  default_page: idle_page #boot/home page. Tap the red circle button to unlock/lock the front door; the settings gear (top right) needs settings_pin.
+
+  # ── Light Widget (Dimmer + Color) ─────────────────────────────────────────
+  light_widget_name: "LIV LITE"
+  light_widget_entity: light.color_light  ## ← change to your color/dim light entity
+
+  # ── CCTV Camera Page ──────────────────────────────────────────────────────
+  cctv_page_title: ""
+  cctv_camera_entity: camera.frontdoor  ## ← change to your HA camera entity id
+  cctv_snapshot_url: "http://ash:466911Zoey@192.168.8.246:8080/photoaf.jpg"  ## ← IP Webcam URL
+
+  # ── Page 2 (second swipe page) ────────────────────────────────────────────
+  page2_title: "More"  ## ← title for second icon page
+
+###### Days and Months ######
+## Change the values on the right to match your locale ##
+  sun: Sun
+  mon: Mon
+  tue: Tue
+  wed: Wed
+  thur: Thur
+  fri: Fri
+  sat: Sat
+  sunday: Sunday
+  monday: Monday
+  tuesday: Tuesday
+  wednesday: Wednesday
+  thursday: Thursday
+  friday: Friday
+  saturday: Saturday
+  
+  jan: Jan
+  feb: Feb
+  mar: Mar
+  apr: Apr
+  jun: Jun
+  jul: Jul
+  aug: Aug
+  sept: Sept
+  oct: Oct
+  nov: Nov
+  dec: Dec
+  january: January
+  february: February
+  march: March
+  april: April
+  may: May
+  june: June
+  july: July
+  august: August
+  september: September
+  october: October
+  november: November
+  december: December
+
+###### Default Images (replaced with MDI icons — no RAM cost) ######
+  # loading_illustration_file: removed — replaced with mdi:file-image icon label
+  # cctv image: removed — replaced with mdi:camera icon label
+  
+######  Audio Files ######
+# FLAC files for on device sounds
+  timerfinished_ondevice: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/sounds/timer_finished.flac
+  wakesound_ondevice: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/sounds/awake.flac
+  notify_ondevice: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/sounds/notify.flac
+# Home Assistant path to MP3 files for external audio sounds
+  timerfinished_external: /local/sounds/timer_finished.mp3
+  wakesound_external: /local/sounds/awake.mp3
+  notify_external: /local/sounds/notify.mp3
+
+######  Voice Assistant Phase IDs ######
+  voice_assist_idle_phase_id: "1"
+  voice_assist_listening_phase_id: "2"
+  voice_assist_thinking_phase_id: "3"
+  voice_assist_replying_phase_id: "4"
+  voice_assist_not_ready_phase_id: "10"
+  voice_assist_error_phase_id: "11"
+  voice_assist_muted_phase_id: "12"
+  voice_assist_timer_finished_phase_id: "20"
+  voice_assist_timer_finishing_phase_id: "30"
+
+###### Fonts & Icons ######
+  font_glyphs: " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~¡¢£€¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀàÁáÂâÃãÄäĀāĂăÅåǺǻẠạĄąÆæǼǽĆćĈĉČčĊċÇçĎďĐđÐðÈèÉéÊêẼẽĚěËëĒēĔĕĖėẸẹĘęĜĝǦǧĞğĠġĢģĤĥĦħıÌìÍíÎîĨĩÏïĪīĬĭİỊịĮįȷĴĵĶķĸĹĺĽľĻļŁłĿŀŃńÑñŇňŅņƝɲŊŋŉÒòÓóÔôÕõÖöŌōŎŏŐőỌọǪǫØøǾǿŒœŔŕŘřŖŗŚśŜŝŠšŞşȘșẞßŤťŢţȚțŦŧÞþÙùÚúÛûŨũÜüŪūŬŭŮůŰűỤụŲųẀẁẂẃŴŵẄẅỲỳÝýŶŷỸỹŸÿȲȳŹźŽžŻżĲĳƏəАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфхцчщьыъэюяμ–—ſ’…"
+  font_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/fonts/Montserrat-Regular.ttf
+  icon_font_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/fonts/materialdesignicons-webfont.ttf
+#Note: LVGL includes a default pre-rendered fonts and icons.
+
+################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
+
+###### Hardware Specific Configuration ######
+
+  font_bpp: 1 #1,2,4,8 - Higher bit depth increases flash usage
+  font_icon_bpp: 4 #1,2,4,8 - Higher bit depth increases flash usage
+  image_byte_order: little_endian
+  lvgl_byte_order: big_endian
+  image_resize: 318x238 # 2px below width by height of screen
+
+  wifi_fast_connect: false
+  wifi_power_save_mode: LIGHT #NONE, LIGHT(default for esp32), HIGH
+  wifi_use_native_roaming: true #if false uses ESPHome post connect roaming
+
+  screen_max_brightness: 1.0
+
+  speaker_i2s_dout_pin: GPIO15
+  speaker_enable_pin: GPIO46
+
+  side_button_pin: GPIO0
+  
+  page_content_height: 210
+  taskbar_height: 30
+  button_radius: 15
+
+esp32:
+  board: esp32s3box
+  flash_size: 16MB
+  cpu_frequency: 240MHz #160MHz to improve battery life, 240MHz otherwise.
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: "y"
+      CONFIG_ESP32S3_DATA_CACHE_64KB: "y"
+      CONFIG_ESP32S3_DATA_CACHE_LINE_64B: "y"
+      CONFIG_ESP32S3_INSTRUCTION_CACHE_32KB: "y" 
+      CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC: "y" 
+      CONFIG_MBEDTLS_SSL_PROTO_TLS1_3: "y"
+    advanced:
+      execute_from_psram: true
+
+psram:
+  mode: octal
+  speed: 80MHz
+
+# ── Bluetooth ──────────────────────────────────────────────────────────────
+# Makes the Box3 visible to Home Assistant's Bluetooth integration as a
+# scanner/proxy (shows up under Settings > Devices & Services > Bluetooth,
+# same as any other discovered adapter). Light scan duty-cycle so it doesn't
+# compete with WiFi/audio.
+esp32_ble_tracker:
+  scan_parameters:
+    active: true
+    interval: 320ms
+    window: 30ms
+
+bluetooth_proxy:
+  active: true
+
+logger:
+  hardware_uart: USB_SERIAL_JTAG
+  logs:
+    lvgl: info
+    text_sensor: ERROR
+    component: ERROR
+
+output:
+  - platform: ledc
+    pin: GPIO47
+    id: backlight_output
+
+i2c:
+  - id: bus_a
+    sda: GPIO08
+    scl: GPIO18
+    scan: true
+    sda_pullup_enabled: true
+    scl_pullup_enabled: true
+    frequency: 100kHz
+
+  - id: bus_b
+    sda: GPIO41
+    scl: GPIO40
+    scan: true
+    sda_pullup_enabled: true
+    scl_pullup_enabled: true
+    frequency: 100kHz
+
+at581x:
+  id: "Radar"
+  i2c_id: bus_b
+
+touchscreen:
+  - platform: gt911
+    i2c_id: bus_a
+    address: 0x5D
+    id: gt911_touchscreen
+    interrupt_pin:
+      number: GPIO3
+      ignore_strapping_warning: true
+    on_touch:
+      - lambda: ESP_LOGD("touchscreen", "on_touch");
+      - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
+    on_release:
+      then:
+        - if:
+            condition: lvgl.is_paused
+            then:
+              - light.turn_on: led
+              - lvgl.resume:
+              - lvgl.widget.redraw:
+        - if:
+            condition:
+              - lvgl.page.is_showing: saver_page
+            then:
+              - lvgl.page.show: ${default_page}
+              - script.execute: draw_display
+
+i2s_audio:
+  - id: audio_bus
+    i2s_lrclk_pin:
+      number: GPIO45
+      ignore_strapping_warning: true
+    i2s_bclk_pin: GPIO17
+    i2s_mclk_pin: GPIO2
+
+audio_adc:
+  - platform: es7210
+    id: es7210_adc
+    i2c_id: bus_a
+    bits_per_sample: 16bit
+    sample_rate: 16000
+
+audio_dac:
+  - platform: es8311
+    id: es8311_dac
+    i2c_id: bus_a
+    bits_per_sample: 16bit
+    sample_rate: 48000
+
+microphone:
+  - platform: i2s_audio
+    id: box_mic
+    sample_rate: 16000
+    i2s_din_pin: GPIO16
+    bits_per_sample: 16bit
+    adc_type: external
+
+spi:
+  - id: spi_bus
+    clk_pin: 7
+    mosi_pin: 6
+
+display:
+  - platform: mipi_spi
+    id: s3_box_lcd
+    model: S3BOX
+    data_rate: 40MHz
+    cs_pin: 5
+    dc_pin: 4
+    reset_pin:
+      number: 48
+      inverted: true
+    update_interval: never
+    auto_clear_enabled: false
+    color_order: bgr
+    invert_colors: false
+
+#### WIFI
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: ${wifi_fast_connect}
+  power_save_mode: ${wifi_power_save_mode}
+  enable_btm: ${wifi_use_native_roaming}  # 802.11v BSS Transition Management
+  enable_rrm: ${wifi_use_native_roaming}  # 802.11k Radio Resource Management
+  ap:
+    ssid: ${name}
+    password: ${wifi_fallback_pwd}   
+  on_connect:
+    - lambda: id(wifi_connection) = true;
+    - script.execute: draw_display
+    - switch.turn_on: speaker_enable
+  on_disconnect:
+    - lambda: id(wifi_connection) = false;
+    - script.execute: draw_display
+
+captive_portal:
+
+###### Standard Configuration ######
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  min_version: 2026.4.0
+  name_add_mac_suffix: false
+  on_boot:
+    priority: 600
+    then:
+      - delay: 15s
+      - at581x.settings:
+          id: "Radar"
+          sensing_distance: 1000
+          stage_gain: 4
+      - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
+      - script.execute: draw_display
+      - if:
+          condition:
+            - lambda: return !id(radar_state);
+          then:
+            - switch.turn_off: radar_enable
+      - delay: 30s
+      - if:
+          condition:
+            lambda: return id(init_in_progress);
+          then:
+            - lambda: id(init_in_progress) = false;
+            - script.execute: draw_display
+  on_shutdown:
+    then:
+      - if:
+          condition:
+            switch.is_off: radar_enable
+          then:
+            - lambda: id(radar_state) = false;
+          else:
+            - lambda: id(radar_state) = true;
+
+  project:
+    name: "Christian.s3box3"
+    version: "2026.04.16"
+
+api:
+  encryption:
+    key: ${api_key}
+  on_client_connected:
+    - lambda: |-
+        id(api_fail_count) = 0;
+        id(api_connection) = true;
+    - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
+    - script.execute: draw_display
+  on_client_disconnected:
+    - lambda: |-
+        id(api_fail_count) = 0;
+        id(api_connection) = false;
+    - script.execute: draw_display
+
+ota:
+  - platform: esphome
+    id: ota_esphome
+    on_begin:
+      - lambda: id(led).turn_on().set_brightness(${screen_max_brightness}).set_transition_length(0).perform();
+                id(led).loop();
+      - lambda: "id(lvgl_display).loop();"
+    on_progress:
+      then:
+        - lambda: "id(lvgl_display).loop();"
+
+time:
+  - platform: homeassistant
+    id: ha_time
+    on_time_sync:
+      - script.execute: time_update
+    on_time:
+      - minutes: '*'
+        seconds: 0
+        then:
+          - script.execute: time_update
+
+interval:
+  - interval: 2s #requires WIFI - fast disconnect detection only
+    then:
+      - if:
+          condition:
+            api.connected:
+          then:
+            - lambda: |-
+                id(api_fail_count) = 0;
+                id(api_connection) = true;
+          else:
+            - lambda: id(api_fail_count) += 1;
+            - if:
+                # Require a few consecutive failed checks before acting, so a
+                # single momentary blip doesn't flash "No HA Connection". This is
+                # a local state check (api.connected), not a network ping, so it
+                # doesn't add any extra traffic on its own — but a genuinely
+                # flaky WiFi/AP will still legitimately reconnect a lot, which
+                # is worth investigating separately if this keeps firing.
+                condition:
+                  and:
+                    - lambda: return id(api_fail_count) >= 3;
+                    - lambda: return !id(init_in_progress);
+                then:
+                  - lambda: id(api_connection) = false;
+                  - script.execute: draw_display
+      - if:
+          condition:
+            and:
+              - lambda: return !(id(ethernet_connection) || id(wifi_connection));
+              - lambda: return !id(init_in_progress);
+          then:
+            - script.execute: draw_display
+
+  - interval: 15s #requires WIFI - periodic display refresh
+    then:
+      - script.execute: draw_display
+      - if: #requires WIFI
+          condition:
+            - lambda: return id(wifi_connection);
+          then:
+            - lvgl.label.update:
+                id: lbl_ip
+                text: !lambda |-
+                  const char* ip = id(ip_addr).state.c_str();
+                  return ip;
+            - lvgl.label.update:
+                id: lbl_ssid
+                text: !lambda |-
+                  const char* ssid = id(connected_ssid).state.c_str();
+                  return ssid;
+            - lvgl.label.update:
+                id: lbl_mac
+                text: !lambda |-
+                  const char* mac = id(device_mac).state.c_str();
+                  return mac;
+
+  - interval: 10s
+    then:
+      - if:
+          condition:
+            lambda: return !id(use_room_temp);
+          then:
+            - lambda: |-
+                float celsius = id(s3temp).state;
+                if (id(temp_unit).current_option() == "Fahrenheit") {
+                  id(display_temp) = celsius * 9.0 / 5.0 + 32.0;
+                } else {
+                  id(display_temp) = celsius;
+                }
+            - lvgl.label.update:
+                id: temp_label
+                text: !lambda |-
+                  char buf[10];
+                  sprintf(buf, "%.${screensaver_temperature_dp}f%s", id(display_temp), id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
+                  return buf;
+            - lvgl.label.update:
+                id: humidity_label
+                text: !lambda |-
+                  char buf[10];
+                  sprintf(buf, "%.${screensaver_humidity_dp}f%s", id(s3humidity).state, "%");
+                  return buf;
+
+button:
+  - platform: factory_reset
+    id: factory_reset_btn
+    internal: true
+
+  - platform: restart
+    id: reboot
+    name: "Reboot"
+    entity_category: diagnostic
+
+  - platform: template
+    id: restart_radar
+    name: "Radar Reset"
+    entity_category: diagnostic
+    on_press:
+      at581x.reset:
+        id: "Radar"
+
+light:
+  - platform: monochromatic
+    id: led
+    name: LCD Backlight
+    entity_category: config
+    output: backlight_output
+    restore_mode: ALWAYS_ON
+    default_transition_length: 50ms
+    on_turn_on:
+      - lvgl.resume:
+      - lvgl.widget.redraw:
+    on_turn_off:
+      - lvgl.pause:
+          show_snow: true
+      - delay: 60s
+      - if:
+          condition: lvgl.is_paused
+          then:
+            - lvgl.pause:
+                show_snow: false
+
+sensor:
+  - platform: aht10
+    i2c_id: bus_b
+    variant: AHT20
+    temperature:
+      name: "S3 Temperature"
+      filters:
+        - lambda: |-
+            return x + id(temp_offset_number).state;
+      id: s3temp
+      on_value:
+        - delay: 15s
+        - if:
+            condition: 
+              lambda: return !id(use_room_temp);
+            then:
+              - lvgl.widget.show: temp_label
+    humidity:
+      name: "S3 Humidity"
+      id: s3humidity
+      on_value:
+        - delay: 15s
+        - if:
+            condition: 
+              lambda: return !id(use_room_temp);
+            then:
+              - lvgl.widget.show: humidity_label
+    update_interval: 30s
+
+  - platform: adc
+    pin: GPIO10
+    id: battery_voltage
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+    device_class: "voltage"
+    entity_category: "diagnostic"
+    disabled_by_default: true
+    update_interval: 30s
+    attenuation: auto
+    filters:
+      - multiply: 4.11
+
+  - platform: copy
+    id: battery_percent
+    source_id: battery_voltage
+    name: "Battery level"
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    device_class: "battery"
+    entity_category: "diagnostic"
+    filters:
+      - lambda: return (x - 2.7) / (4.2 - 2.7) * 100;
+      - clamp:
+          min_value: 0
+          max_value: 100
+    on_value:
+      - lvgl.label.update:
+          id: lbl_battery
+          text: !lambda |-
+            char buf[10];
+            sprintf(buf, "%.f%%", id(battery_percent).state);
+            return buf;
+      - if:
+          condition:
+              lambda: return (x > 0);
+          then:
+            - lvgl.widget.show: lbl_battery_title
+            - lvgl.widget.show: lbl_battery
+          else:
+            - lvgl.widget.hide: lbl_battery_title
+            - lvgl.widget.hide: lbl_battery
+    
+  - platform: uptime
+    id: up_sens
+    on_value:
+      - lambda: |-
+          int seconds = id(up_sens).state;
+          int days = seconds / 86400;
+          int hours = seconds / 3600;
+          int minutes = (seconds % 3600) / 60;
+          seconds %= 60;
+          id(up_sens_text).publish_state(str_sprintf("%03d:%02d:%02d:%02d", days, hours, minutes, seconds));
+    update_interval: 300s
+
+  - platform: wifi_signal #requires WIFI
+    name: "WiFi db"
+    id: wifi_signal_db
+    update_interval: 30s
+
+  - platform: copy #requires WIFI
+    source_id: wifi_signal_db
+    name: "WiFi Signal"
+    id: wifi_percent
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "%"
+    entity_category: "diagnostic"
+    device_class: ""
+    on_value:
+      - lvgl.label.update:
+          id: lbl_ss
+          text: !lambda |-
+            char buf[10];
+            sprintf(buf, "%.f%%", id(wifi_percent).state);
+            return buf;
+
+### SCREENSAVER FORECAST TEMPERATURE ###
+  - platform: homeassistant
+    id: external_temp
+    entity_id: ${screensaver_weather_entity}
+    attribute: temperature
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: temp_ext_label
+        - lvgl.label.update:
+            id: temp_ext_label
+            text: !lambda |-
+              char buf[10];
+              sprintf(buf, "%.${screensaver_weather_dp}f%s", x, id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
+              return buf;
+
+### SCREENSAVER ROOM TEMPERATURE ###
+  - platform: homeassistant
+    id: screensaver_temperature
+    entity_id: ${screensaver_temperature_entity}
+    internal: true
+    on_value:
+      then:
+        - lambda: id(use_room_temp) = true;
+        - lvgl.widget.show: temp_label
+        - lvgl.label.update:
+            id: temp_label   
+            text: !lambda |-
+              char buf[10];
+              sprintf(buf, "%.${screensaver_temperature_dp}f%s", x, id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
+              return buf;
+
+### SCREENSAVER ROOM HUMIDITY ###
+  - platform: homeassistant
+    id: screensaver_humidity
+    entity_id: ${screensaver_humidity_entity}
+    internal: true
+    on_value:
+      then:
+        - lambda: id(use_room_temp) = true;
+        - lvgl.widget.show: humidity_label
+        - lvgl.label.update:
+            id: humidity_label   
+            text: !lambda |-
+                  char buf[10];
+                  sprintf(buf, "%.${screensaver_humidity_dp}f%s", x, "%");
+                  return buf;
+
+### SCREENSAVER LOWER LEFT ###
+  - platform: homeassistant
+    id: screensaver_lower_left
+    entity_id: ${screensaver_lower_left_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lower_left_label
+        - lvgl.label.update:
+            id: lower_left_label  
+            text: !lambda |-
+                  char buf[10];
+                  sprintf(buf, "%.${screensaver_lower_left_dp}f%s", x, "${screensaver_lower_left_units}");
+                  return buf;
+                  
+### SCREENSAVER LOWER RIGHT ###
+  - platform: homeassistant
+    id: screensaver_lower_right
+    entity_id: ${screensaver_lower_right_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lower_right_label
+        - lvgl.label.update:
+            id: lower_right_label  
+            text: !lambda |-
+                  char buf[10];
+                  sprintf(buf, "%.${screensaver_lower_right_dp}f%s", x, "${screensaver_lower_right_units}");
+                  return buf;
+
+##############################################################################
+## LIGHT WIDGET SENSORS
+##############################################################################
+
+### LIGHT WIDGET - Brightness ###
+  - platform: homeassistant
+    id: light_widget_brightness
+    entity_id: ${light_widget_entity}
+    attribute: brightness
+    internal: true
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: |-
+                return !std::isnan(x) &&
+                  !(lv_indev_get_act() != nullptr &&
+                    lv_indev_get_active_obj() == id(slider_light_brightness));
+            then:
+              - lvgl.slider.update:
+                  id: slider_light_brightness
+                  value: !lambda return (int)(x / 255.0 * 100.0);
+
+### LIGHT WIDGET - Color Temp ###
+  - platform: homeassistant
+    id: light_widget_color_temp
+    entity_id: ${light_widget_entity}
+    attribute: color_temp
+    internal: true
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: |-
+                return !std::isnan(x) &&
+                  !(lv_indev_get_act() != nullptr &&
+                    lv_indev_get_active_obj() == id(slider_color_temp));
+            then:
+              - lvgl.slider.update:
+                  id: slider_color_temp
+                  value: !lambda return (int)x;
+
+
+speaker:
+  - id: i2s_audio_speaker
+    platform: i2s_audio
+    i2s_audio_id: audio_bus
+    i2s_dout_pin: ${speaker_i2s_dout_pin}
+    dac_type: external
+    sample_rate: 48000
+    bits_per_sample: 16bit
+    channel: mono
+    audio_dac: es8311_dac
+    buffer_duration: 100ms
+
+  - id: mixing_speaker
+    platform: mixer
+    output_speaker: i2s_audio_speaker
+    source_speakers:
+      - id: announcement_mixing_input
+        timeout: never
+      - id: media_mixing_input
+        timeout: never
+
+  - platform: resampler
+    id: announcement_resampling_speaker
+    output_speaker: announcement_mixing_input
+    sample_rate: 48000
+    bits_per_sample: 16
+
+  - platform: resampler
+    id: media_resampling_speaker
+    output_speaker: media_mixing_input
+    sample_rate: 48000
+    bits_per_sample: 16
+
+media_player:
+  - platform: speaker
+    name: Media Player
+    id: speaker_media_player
+    task_stack_in_psram: true
+    volume_increment: 0.05
+    volume_min: 0.5
+    volume_max: 0.8
+    announcement_pipeline:
+      speaker: announcement_resampling_speaker
+      format: FLAC
+      sample_rate: 48000
+      num_channels: 1
+    media_pipeline:
+      speaker: media_resampling_speaker
+      format: FLAC
+      num_channels: 2
+      sample_rate: 48000
+    on_state:
+      then:
+        - lambda: ESP_LOGD("media_player", "on_state");
+        - if:
+            condition:
+              not:
+                media_player.is_announcing:
+            then:
+              - mixer_speaker.apply_ducking:
+                  id: media_mixing_input
+                  decibel_reduction: 0
+                  duration: 1.0s
+    on_announcement:
+      - lambda: ESP_LOGD("media_player", "on_announcement");
+      - mixer_speaker.apply_ducking:
+          id: media_mixing_input
+          decibel_reduction: 20
+          duration: 0.0s
+    on_pause:
+      - media_player.stop
+    on_volume:
+      - lambda: |-
+          ESP_LOGD("volume", "Volume: %f", x);
+      - lambda: id(speaker_volume) = int(x * 10) ;
+
+script:
+  - id: draw_display
+    then:
+      - if:
+          condition:
+            lambda: return !id(init_in_progress);
+          then:
+            - script.execute: saver_enabled
+            - if:
+                condition:
+                  and:
+                    - or:
+                        - lambda: return id(ethernet_connection);
+                        - lambda: return id(wifi_connection);
+                    - lambda: return id(api_connection);
+                then:
+                  - lvgl.widget.hide: lbl_no_ha_connection
+                else:
+                  - lvgl.widget.show: lbl_no_ha_connection
+
+  - id: saver_enabled
+    then:
+      - if:
+          condition:
+            and:
+              - switch.is_on: s_saver
+              - not:
+                  lvgl.page.is_showing: saver_page
+          then:
+            - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
+            - delay: !lambda return id(s_saver_delay).state * 1000;
+            - lambda: id(led).turn_on().set_brightness(id(s_saver_brightness).state /100).perform();
+            - lvgl.page.show: saver_page
+      - if:
+          condition:
+            and:
+              - switch.is_on: s_saver_mode
+              - lvgl.page.is_showing: saver_page
+          then:
+            - delay: !lambda return id(s_saver_blank_delay).state * 1000;
+            - light.turn_off: led
+    mode: restart
+
+  - id: saver_enabled_manual
+    then:
+      - if:
+          condition:
+            - switch.is_on: s_saver
+          then:
+            - lambda: id(led).turn_on().set_brightness(id(s_saver_brightness).state /100).perform();
+            - lvgl.page.show: saver_page
+
+      - if:
+          condition:
+            - switch.is_on: s_saver_mode
+          then:
+            - delay: !lambda return id(s_saver_blank_delay).state * 1000;
+            - light.turn_off: led
+    mode: restart
+
+  - id: time_update
+    then:
+      - lvgl.label.update:
+          id: daydate_label
+          text: !lambda |-
+            static const char* days[] {"${sun}","${mon}","${tue}","${wed}","${thur}","${fri}","${sat}"};
+            static const char* months[] {"${january}","${february}","${march}","${april}","${may}","${june}","${july}","${august}","${september}","${october}","${november}","${december}"};
+            auto t = id(ha_time).now();
+            char buffer[50];
+            sprintf(buffer, "%s %s %d",days[t.day_of_week - 1],months[t.month - 1],t.day_of_month);
+            return std::string(buffer);
+      - lvgl.label.update:
+          id: home_date_label
+          text: !lambda |-
+            static const char* days[] {"${sun}","${mon}","${tue}","${wed}","${thur}","${fri}","${sat}"};
+            static const char* months[] {"${january}","${february}","${march}","${april}","${may}","${june}","${july}","${august}","${september}","${october}","${november}","${december}"};
+            auto t = id(ha_time).now();
+            char buffer[50];
+            sprintf(buffer, "%s %s %d",days[t.day_of_week - 1],months[t.month - 1],t.day_of_month);
+            return std::string(buffer);
+      - if:
+          condition:
+            - lambda: 'return { id(time_format).current_option() == "24 Hr" };'
+          then:
+            - lvgl.label.update:
+                id: digitaltime
+                text: 
+                  time_format: "%H:%M"
+                  time: !lambda return id(ha_time).now();
+            - lvgl.label.update:
+                id: home_clock_label
+                text: 
+                  time_format: "%H:%M"
+                  time: !lambda return id(ha_time).now();
+          else:
+            - lvgl.label.update:
+                id: digitaltime
+                text: 
+                  time_format: "%l:%M %p"
+                  time: !lambda return id(ha_time).now();
+            - lvgl.label.update:
+                id: home_clock_label
+                text: 
+                  time_format: "%l:%M %p"
+                  time: !lambda return id(ha_time).now();
+      - if:
+          condition:
+            and:
+              - switch.is_on: reboot_schedule
+              - lambda: 'return { (id(ha_time).now().hour == id(reboot_time).hour) };'
+              - lambda: 'return { (id(ha_time).now().minute == id(reboot_time).minute) };'
+              - lambda: 'return { (id(ha_time).now().second <= 15) };'
+          then:
+            - delay: 10s
+            - button.press: reboot
+    mode: single
+    
+    
+  - id: set_uimode
+    then:
+      - if:
+          condition: 
+            - lambda: return (id(uimode).current_option() != id(current_uimode));
+          then:
+            - if:
+                condition: 
+                  lambda: return (id(uimode).current_option() == "Home");
+                then:
+                  - lvgl.style.update:
+                      id: header_footer
+                      bg_color: 0x595959
+                      bg_grad_color: 0x404040
+                  - lvgl.style.update:
+                      id: button_style
+                      bg_color: 0x000000
+                      bg_grad_color: 0x404040
+                  - lvgl.style.update:
+                      id: button_standard_style
+                      bg_color: 0x216dab
+                      bg_grad_color: 0x404040
+                  - lvgl.style.update:
+                      id: button_pressed_style
+                      bg_color: 0x666666
+                      bg_grad_color: 0x00334d
+                  - lvgl.style.update:
+                      id: button_checked_style
+                      bg_color: 0x000000
+                      bg_grad_color: 0x002233
+            - lambda: strncpy(id(current_uimode), id(uimode).current_option().c_str(), 50);
+            - lvgl.widget.redraw:
+
+switch:
+  - platform: gpio
+    name: Speaker Enable
+    id: speaker_enable
+    pin:
+      number: ${speaker_enable_pin}
+      ignore_strapping_warning: true
+    restore_mode: ALWAYS_OFF
+    entity_category: config
+    disabled_by_default: true
+
+  - platform: template
+    name: Require PIN to unlock front door
+    id: front_door_require_pin
+    icon: 'mdi:lock-question'
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    entity_category: config
+    turn_on_action:
+      - lvgl.checkbox.update:
+          id: chk_front_door_pin
+          state:
+            checked: true
+    turn_off_action:
+      - lvgl.checkbox.update:
+          id: chk_front_door_pin
+          state:
+            checked: false
+
+  - platform: template
+    name: "Reboot Schedule"
+    id: reboot_schedule
+    icon: 'mdi:restart'
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+
+  - platform: template
+    id: s_saver
+    name: ScrSave enable
+    icon: mdi:sleep
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+    turn_on_action:
+      - lvgl.checkbox.update:
+          id: chk_screensaver
+          state:
+            checked: true
+    turn_off_action:
+      - lvgl.checkbox.update:
+          id: chk_screensaver
+          state:
+            checked: false
+
+  - platform: template
+    id: s_saver_mode
+    name: ScrOff enable
+    icon: 'mdi:monitor-off'
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+    turn_on_action:
+      - lvgl.checkbox.update:
+          id: chk_timeout_blank
+          state:
+            checked: true
+    turn_off_action:
+      - lvgl.checkbox.update:
+          id: chk_timeout_blank
+          state:
+            checked: false
+
+  - platform: template
+    id: s_saver_presc
+    name: Screen wake on motion
+    icon: 'mdi:motion-sensor'
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    turn_on_action:
+      - lvgl.checkbox.update:
+          id: chk_wake_presence
+          state:
+            checked: true
+    turn_off_action:
+      - lvgl.checkbox.update:
+          id: chk_wake_presence
+          state:
+            checked: false
+
+  - platform: at581x
+    at581x_id: "Radar"
+    id: radar_enable
+    name: "Radar Enable"
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_ON
+    on_turn_off:
+      - lambda: id(radar_state) = false;
+
+select:
+  - platform: lvgl
+    id: time_format
+    entity_category: config
+    restore_value: true
+    name: Time Format
+    widget: dropdown_timeformat
+
+  - platform: lvgl
+    id: ss_clockstyle
+    entity_category: config
+    restore_value: true
+    name: Screensaver Clock
+    widget: dropdown_ssclock
+    
+  - platform: lvgl
+    id: uimode
+    entity_category: config
+    restore_value: true
+    name: UI Mode
+    widget: dropdown_uimode
+
+  - platform: template
+    id: temp_unit
+    name: "Temperature Unit"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    options:
+      - Celsius
+      - Fahrenheit
+    initial_option: Celsius
+    on_value:
+      - if:
+          condition:
+            lambda: return id(temp_unit).current_option() == "Celsius";
+          then:
+            - lvgl.dropdown.update:
+                id: dropdown_tempunit
+                selected_index: 0
+          else:
+            - lvgl.dropdown.update:
+                id: dropdown_tempunit
+                selected_index: 1
+
+datetime:
+  - id: reboot_time
+    platform: template
+    type: time
+    optimistic: true
+    restore_value: true
+    initial_value:
+      hour: 02
+      minute: 00
+      second: 00
+    name: "Reboot Time"
+    icon: 'mdi:restart-alert'
+    entity_category: config
+
+number:
+  - id: s_saver_delay
+    platform: template
+    name: "ScrSave delay"
+    icon: 'mdi:sleep'
+    entity_category: config
+    unit_of_measurement: 'secs'
+    optimistic: true
+    restore_value: true
+    initial_value: 120
+    step: 5
+    min_value: 10
+    max_value: 999999
+    on_value:
+      - component.update: s_saver_delay
+      - script.execute: saver_enabled
+      - lvgl.spinbox.update:
+          id: spinbox_delay
+          value: !lambda return x;
+
+  - id: s_saver_blank_delay
+    platform: template
+    name: "ScrOff delay"
+    icon: 'mdi:monitor-off'
+    entity_category: config
+    unit_of_measurement: 'secs'
+    optimistic: true
+    restore_value: true
+    initial_value: 1800
+    step: 5
+    min_value: 10
+    max_value: 999999
+    on_value:
+      - component.update: s_saver_blank_delay
+      - script.execute: saver_enabled
+      - lvgl.spinbox.update:
+          id: spinbox_scr_delay
+          value: !lambda return x;
+
+  - id: s_saver_brightness
+    platform: template
+    name: "ScrSave Brightness"
+    icon: 'mdi:sleep'
+    entity_category: config
+    unit_of_measurement: '%'
+    optimistic: true
+    restore_value: true
+    initial_value: 40
+    step: 5
+    min_value: 20
+    max_value: 100
+    on_value:
+      - component.update: s_saver_brightness
+      - script.execute: saver_enabled
+      - lvgl.slider.update:
+          id: slider_dimbrightness
+          value: !lambda return x;
+
+  - id: s_default_brightness
+    platform: template
+    name: "Default Brightness"
+    icon: 'mdi:monitor'
+    entity_category: config
+    unit_of_measurement: '%'
+    optimistic: true
+    restore_value: true
+    initial_value: 100
+    step: 5
+    min_value: 20
+    max_value: 100
+    on_value:
+      - component.update: s_default_brightness
+      - script.execute: saver_enabled
+      - lvgl.slider.update:
+          id: slider_brightness
+          value: !lambda return x;
+
+  - id: radar_delayed_off
+    platform: template
+    name: "Presence duration"
+    icon: mdi:account-clock
+    optimistic: true
+    restore_value: true
+    initial_value: 60
+    min_value: 10
+    step: 5
+    max_value: 300
+    unit_of_measurement: 'secs'
+    entity_category: config
+    mode: box
+
+  - platform: lvgl
+    name: "Temp Offset"
+    id: temp_offset_number
+    widget: spinbox_temp_offset
+    entity_category: config
+    restore_value: true
+    unit_of_measurement: 'C'
+    mode: box
+
+globals:
+  - id: init_in_progress
+    type: bool
+    restore_value: false
+    initial_value: "true"
+  - id: ethernet_connection
+    type: bool
+    restore_value: false
+    initial_value: "false"
+  - id: wifi_connection
+    type: bool
+    restore_value: false
+    initial_value: "false"
+  - id: api_connection
+    type: bool
+    restore_value: false
+    initial_value: "false"
+  - id: api_fail_count
+    type: int
+    restore_value: false
+    initial_value: "0"
+  - id: speaker_volume
+    type: int
+    restore_value: false
+    initial_value: '5'
+  - id: alarm_action
+    type: std::string
+    initial_value: ""
+  - id: display_temp
+    type: float
+    restore_value: false
+    initial_value: '0.0'
+  - id: current_uimode
+    type: char[50]
+    initial_value: ""
+  - id: use_room_temp
+    type: bool
+    restore_value: false
+    initial_value: "false"
+  - id: radar_state
+    type: bool
+    restore_value: true
+    initial_value: "true"
+
+font:
+  - file: ${font_file}
+    id: my_font
+    size: 14
+    bpp: ${font_bpp}
+    glyphs:
+      '${font_glyphs}'
+
+  - file: ${font_file}
+    id: my_font12
+    size: 12
+    bpp: ${font_bpp}
+    glyphs:
+      '${font_glyphs}'
+
+  - file: ${font_file}
+    id: my_font16
+    size: 16
+    bpp: ${font_bpp}
+    glyphs:
+      '${font_glyphs}'
+
+  - file: ${font_file}
+    id: labelfont_large
+    size: 18
+    bpp: ${font_bpp}
+    glyphs:
+      '${font_glyphs}'
+
+  - file: ${font_file}
+    id: timefont_xlarge
+    size: 60
+    bpp: ${font_bpp}
+    glyphs:
+      '${font_glyphs}'
+
+  - file: ${font_file}
+    id: my_font22
+    size: 22
+    bpp: ${font_bpp}
+    glyphs:
+      '${font_glyphs}'
+
+
+      
+  - file: ${icon_font_file}
+    id: icon_font_55
+    size: 45
+    bpp: ${font_icon_bpp}
+    glyphs: &icon_glyphs
+      - "\U000F0079"#battery 100%
+      - "\U000F007A"#battery 10%
+      - "\U000F007B"#battery 20%
+      - "\U000F007C"#battery 30%
+      - "\U000F007D"#battery 40%
+      - "\U000F007E"#battery 50%
+      - "\U000F007F"#battery 60%
+      - "\U000F0080"#battery 70%
+      - "\U000F0081"#battery 80%
+      - "\U000F0082"#battery 90%
+      - "\U000F008E"#mdi-battery-outline
+      - "\U000F0091"#mdi-battery-unknown
+      - "\U000F0020"#alarmclock
+      - "\U000F009E"#bell
+      - "\U000F0150"#clock
+      - "\U000F01AE"#gbp pound symbol
+      - "\U000F0210"#fan
+      - "\U000F0238"#heating
+      - "\U000F024A"#garden/flower
+      - "\U000F0335"#light bulb off
+      - "\U000F036C"#microphone on
+      - "\U000F036D"#microphone off
+      - "\U000F036F"#voice settings
+      - "\U000F03E4"#pause
+      - "\U000F040A"#play
+      - "\U000F040E"#play/pause
+      - "\U000F0493"#settings cog
+      - "\U000F04AD"#next track
+      - "\U000F04AE"#previous track
+      - "\U000F04B9"#living room
+      - "\U000F04C8"#spots
+      - "\U000F04DB"#stop
+      - "\U000F0502"#screen settings
+      - "\U000F050F"#temp sensor
+      - "\U000F051B"#timer
+      - "\U000F0521"#toggle on
+      - "\U000F0565"#arming
+      - "\U000F057E"#speaker on
+      - "\U000F0581"#speaker off
+      - "\U000F05CB"#voice
+      - "\U000F06A5"#power-plug
+      - "\U000F068A"#alarm home
+      - "\U000F068E"#alarm snooze
+      - "\U000F06E8"#light bulb illuminated
+      - "\U000F075A"#music
+      - "\U000F075D"#vol plus
+      - "\U000F075E"#vol minus
+      - "\U000F0769"#ceiling
+      - "\U000F07D0"#api connected
+      - "\U000F07F4"#tv
+      - "\U000F0873"#car miles non
+      - "\U000F0874"#car miles full
+      - "\U000F0875"#car miles low
+      - "\U000F087B"#api disconnected
+      - "\U000F08D6"#settings
+      - "\U000F097E"#light switch
+      - "\U000F099D"#alarm away
+      - "\U000F099E"#disarmed
+      - "\U000F0A19"#toggle off
+      - "\U000F0B26"#down
+      - "\U000F0B28"#left
+      - "\U000F0B2A"#right
+      - "\U000F0B2C"#up
+      - "\U000F0B6C"#car battery
+      - "\U000F0D90"#screen off
+      - "\U000F0EBA"#stats
+      - "\U000F0ED4"#voice off
+      - "\U000F0FCE"#scene
+      - "\U000F1061"#dining
+      - "\U000F10CD"#battery warning
+      - "\U000F1160"#kitchen
+      - "\U000F12A8"#touch button
+      - "\U000F12D3"#garage closed
+      - "\U000F12D4"#garage open
+      - "\U000F1322"#tools
+      - "\U000F16BC"#wifidisconnected
+      - "\U000F16BD"#wifi connected
+      - "\U000F1722"#fire off
+      - "\U000F1747"#tall lamp
+      - "\U000F1828"#armed night
+      - "\U000F192D"#electricity
+      - "\U000F1987"#floods
+      - "\U000F1A12"#home button
+      - "\U000F1A1B"#gas
+      - "\U000F1C3B"#battery charging/usb powered
+      - "\U000F1C6F"#info
+      - "\U000F05FA"#kettle on
+      - "\U000F131B"#kettle off
+      - "\U000F070D"#vacuum
+      - "\U000F1C01"#vacuum off
+      - "\U000F0AAC"#dishwasher
+      - "\U000F11B8"#dishwasheralert
+      - "\U000F083B"#televisionoff
+      - "\U000F033E"#lock
+      - "\U000F033F"#lock-open
+      - "\U000F00DF"#brightness 
+      - "\U000F0594"# clear-night
+      - "\U000F0240"# mdi:message-text (speech bubble)
+      - "\U000F03B6"# mdi:ear-hearing (listening)
+      - "\U000F04E6"# mdi:thought-bubble (thinking)
+      - "\U000F029A"# mdi:alert-circle (error)
+      - "\U000F0590"# cloudy
+      - "\U000F0F2F"# exceptional
+      - "\U000F0591"# fog
+      - "\U000F0592"# hail
+      - "\U000F0593"# lightning
+      - "\U000F067E"# lightning-rainy
+      - "\U000F0595"# partlycloudy
+      - "\U000F0596"# pouring
+      - "\U000F0597"# rainy
+      - "\U000F0598"# snowy
+      - "\U000F067F"# snowy-rainy
+      - "\U000F0599"# sunny
+      - "\U000F059D"# windy
+      - "\U000F059E"# windy-variant
+      - "\U000F14E4"# sunny-off
+      - "\U000F18F2"# refresh-auto
+      - "\U000F0450"# refresh
+      - "\U000F1011"# blinds open
+      - "\U000F00AC"# blinds closed
+      - "\U000F00A5"# mdi:camera (cctv placeholder)
+      - "\U000F021B"# mdi:file-image (online image placeholder)
+      - "\U000F1A6B"# roller-shade open
+      - "\U000F1A6C"# roller-shade closed
+      
+  - file: ${icon_font_file}
+    id: iconfont_small
+    size: 20
+    bpp: ${font_icon_bpp}
+    glyphs: *icon_glyphs
+
+  - file: ${icon_font_file}
+    id: icon_font_30
+    size: 30
+    bpp: ${font_icon_bpp}
+    glyphs: *icon_glyphs
+
+  - file: ${icon_font_file}
+    id: icon_font_80
+    size: 75
+    bpp: ${font_icon_bpp}
+    glyphs: *icon_glyphs
+
+text_sensor:
+### LIGHT WIDGET STATE SENSOR ###
+  - platform: homeassistant
+    id: light_widget_state
+    entity_id: ${light_widget_entity}
+    internal: true
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: return (x == "on");
+            then:
+              - lvgl.widget.update:
+                  id: btn_light_widget_toggle
+                  state:
+                    checked: true
+              - lvgl.label.update:
+                  id: ico_light_widget
+                  text: "\U000F06E8"
+                  text_color: yellow
+            else:
+              - lvgl.widget.update:
+                  id: btn_light_widget_toggle
+                  state:
+                    checked: false
+              - lvgl.label.update:
+                  id: ico_light_widget
+                  text: "\U000F0335"
+                  text_color: 0x888888
+  - platform: wifi_info #requires WIFI
+    ip_address:
+      name: IP Address
+      id: ip_addr
+      entity_category: "diagnostic"
+    ssid:
+      id: connected_ssid
+      name: SSID
+      entity_category: "diagnostic"
+    bssid:
+      id: connected_bssid
+      name: BSSID
+      entity_category: "diagnostic"
+    mac_address:
+      id: device_mac
+
+  - platform: template
+    id: up_sens_text
+    name: Device uptime
+    entity_category: "diagnostic"
+    icon: mdi:clock
+    on_value:
+      - lvgl.label.update:
+          id: lbl_uptime
+          text: !lambda |-
+            const char* uptime = id(up_sens_text).state.c_str();
+            return uptime;
+
+### SCREENSAVER FORECAST CONDITION ###
+  - platform: homeassistant
+    id: external_temp_condition
+    entity_id: ${screensaver_weather_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: temp_condition_label
+        - lvgl.label.update:
+            id: temp_condition_label  
+            text: !lambda |-
+              static char buf[20];
+              std::string icon;
+              if (id(external_temp_condition).state == "clear-night") {
+                  icon = "\U000F0594";
+              } else if (id(external_temp_condition).state == "cloudy") {
+                  icon = "\U000F0590";
+              } else if (id(external_temp_condition).state == "exceptional") {
+                  icon = "\U000F0F2F";
+              } else if (id(external_temp_condition).state == "fog") {
+                  icon = "\U000F0591";
+              } else if (id(external_temp_condition).state == "hail") {
+                  icon = "\U000F0592";
+              } else if (id(external_temp_condition).state == "lightning") {
+                  icon = "\U000F0593";
+              } else if (id(external_temp_condition).state == "lightning-rainy") {
+                  icon = "\U000F067E";
+              } else if (id(external_temp_condition).state == "partlycloudy") {
+                  icon = "\U000F0595";
+              } else if (id(external_temp_condition).state == "pouring") {
+                  icon = "\U000F0596";
+              } else if (id(external_temp_condition).state == "rainy") {
+                  icon = "\U000F0597";
+              } else if (id(external_temp_condition).state == "snowy") {
+                  icon = "\U000F0598";
+              } else if (id(external_temp_condition).state == "snowy-rainy") {
+                  icon = "\U000F067F";
+              } else if (id(external_temp_condition).state == "sunny") {
+                  icon = "\U000F0599";
+              } else if (id(external_temp_condition).state == "windy") {
+                  icon = "\U000F059D";
+              } else if (id(external_temp_condition).state == "windy-variant") {
+                  icon = "\U000F059E";
+              } else if (id(external_temp_condition).state == "sunny-off") {
+                  icon = "\U000F14E4"; 
+              } else {
+                  icon = "\U000F14E4";
+              }
+              snprintf(buf, sizeof(buf), "%s", icon.c_str());
+              return buf;
+
+### FRONT DOOR LOCK SCREEN SENSOR ###
+  - platform: homeassistant
+    id: front_door_item
+    entity_id: ${front_door_entity}
+    internal: true
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: return (id(front_door_item).state == "locked");
+            then:
+              - lvgl.label.update:
+                  id: ico_front_door_lock
+                  text_color: lime
+                  text: "\U000F033E"
+              - lvgl.label.update:
+                  id: lbl_front_door_status
+                  text_color: lime
+                  text: "LOCKED"
+              - lvgl.label.update:
+                  id: lbl_front_door_action
+                  text: "Tap to Unlock"
+              - lvgl.widget.update:
+                  id: but_front_door_lock
+                  bg_color: 0x001a00
+                  bg_grad_color: 0x003300
+              - lvgl.label.update:
+                  id: ico_home_door_status
+                  text_color: lime
+                  text: "\U000F033E"
+              - lvgl.label.update:
+                  id: lbl_home_door_status
+                  text_color: lime
+                  text: '${front_door_name}: Locked'
+            else:
+              - lvgl.label.update:
+                  id: ico_front_door_lock
+                  text_color: red
+                  text: "\U000F033F"
+              - lvgl.label.update:
+                  id: lbl_front_door_status
+                  text_color: red
+                  text: "UNLOCKED"
+              - lvgl.label.update:
+                  id: lbl_front_door_action
+                  text: "Tap to Lock"
+              - lvgl.widget.update:
+                  id: but_front_door_lock
+                  bg_color: 0x330000
+                  bg_grad_color: 0x1a0000
+              - lvgl.label.update:
+                  id: ico_home_door_status
+                  text_color: red
+                  text: "\U000F033F"
+              - lvgl.label.update:
+                  id: lbl_home_door_status
+                  text_color: red
+                  text: '${front_door_name}: Unlocked'
+
+color:
+  - id: active_timer_color
+    hex: 26ed3a
+  - id: paused_timer_color
+    hex: 3b89e3
+  - id: green
+    hex: 75D15F
+  - id: red
+    hex: FF3131
+  - id: blue
+    hex: 47B7E9
+  - id: blue_drk
+    hex: '085296'
+  - id: amber
+    hex: FBAB35
+  - id: lime
+    hex: 20FC30
+  - id: pink
+    hex: D92BBC
+  - id: yellow
+    hex: FFC000
+  - id: black
+    hex: '000000'
+  - id: white
+    hex: 'ffffff'
+
+key_collector:
+  - source_id: lvgl_keypad
+    min_length: 4
+    max_length: 12
+    end_keys: "#"
+    end_key_required: true
+    back_keys: "*"
+    allowed_keys: "0123456789*#"
+    timeout: 10s
+    on_progress:
+      - if:
+          condition:
+            lambda: return (0 != x.compare(std::string{""}));
+          then:
+            - lambda: |-
+                ESP_LOGD("LVGL Keypad", "Current PIN: %s", x.c_str());
+    on_timeout:
+      - lambda: id(alarm_action) = "";
+      - lvgl.page.show: idle_page
+    on_result:
+      - lambda: |-
+          ESP_LOGD("LVGL Keypad", "Submitted PIN: %s", x.c_str());
+      - if:
+          condition:
+            lambda: return (id(alarm_action) == "view_lock_page");
+          then:
+            - if:
+                condition:
+                  lambda: return (0 == x.compare(std::string("${master_pin}")));
+                then:
+                  - lambda: id(alarm_action) = "";
+                  - lvgl.page.show: main_lock_page
+                else:
+                  - lvgl.label.update:
+                      id: lbl_keypad_error
+                      text: "Incorrect PIN"
+                  - lvgl.widget.show: lbl_keypad_error
+                  - lambda: id(alarm_action) = "";
+                  - lvgl.page.show: idle_page
+          else:
+            - if:
+                condition:
+                  lambda: return (id(alarm_action) == "settings_unlock");
+                then:
+                  - if:
+                      condition:
+                        lambda: return (0 == x.compare(std::string("${settings_pin}")));
+                      then:
+                        - lambda: id(alarm_action) = "";
+                        - lvgl.page.show: settings_hub_page
+                      else:
+                        - lvgl.label.update:
+                            id: lbl_keypad_error
+                            text: "Incorrect PIN"
+                        - lvgl.widget.show: lbl_keypad_error
+                        - lambda: id(alarm_action) = "";
+                        - lvgl.page.show: idle_page
+                else:
+                  - lambda: id(alarm_action) = "";
+                  - lvgl.page.show: idle_page
+
+###### LVGL Display UI ######
+# All UI configuration is below. 
+# The sequences of pages impacts the next/previous buttons.
+# The UI sends actions to entities while entities send status or can change icons/colors/properties.
+# This means most widgets that perform an action on an entity the corresponding entity updates the widget.
+#############################
+lvgl:
+  id: lvgl_display
+  bottom_layer:
+    bg_color: 0x000000
+  buffer_size: 100%
+  byte_order: ${lvgl_byte_order}
+  on_idle:
+    - timeout: 1s
+      then:
+        - script.execute: saver_enabled
+  pages:
+    - id: main_lock_page
+      skip: true
+      on_swipe_left:
+        - lvgl.page.show: idle_page
+      on_swipe_right:
+        - lvgl.page.show: idle_page
+      widgets:
+        - obj:
+            styles: page_content
+            widgets:
+              - button:
+                  id: but_front_door_lock
+                  width: 100%
+                  height: 100%
+                  align: CENTER
+                  bg_color: 0x330000
+                  bg_grad_color: 0x1a0000
+                  bg_grad_dir: VER
+                  bg_opa: COVER
+                  border_width: 0
+                  radius: 0
+                  shadow_width: 0
+                  widgets:
+                    - label:
+                        id: ico_front_door_lock
+                        align: CENTER
+                        y: -34
+                        text_font: icon_font_80
+                        text_color: red
+                        text: "\U000F033F"
+                    - label:
+                        id: lbl_front_door_status
+                        align: CENTER
+                        y: 40
+                        text_font: labelfont_large
+                        text_align: CENTER
+                        text_color: red
+                        text: "UNLOCKED"
+                    - label:
+                        id: lbl_front_door_action
+                        align: CENTER
+                        y: 68
+                        text_font: my_font16
+                        text_align: CENTER
+                        text_color: 0xCCCCCC
+                        text: "Tap to Lock"
+                    - label:
+                        align: TOP_MID
+                        y: 6
+                        text_font: my_font16
+                        text_align: CENTER
+                        text_color: 0xCCCCCC
+                        text: '${front_door_name}'
+                    - label:
+                        id: lbl_door_alarm_status
+                        align: TOP_MID
+                        y: 32
+                        text_font: my_font12
+                        text_align: CENTER
+                        text_color: 0xCCCCCC
+                        text: '${door_alarm_door_name}: --'
+                  on_release:
+                    then:
+                      # PIN gating (if enabled) already happened before this page
+                      # was shown, so a tap here just performs the action, then
+                      # returns to the home page.
+                      - if:
+                          condition:
+                            lambda: return (id(front_door_item).state == "locked");
+                          then:
+                            - homeassistant.action:
+                                action: lock.unlock
+                                data:
+                                  entity_id: ${front_door_entity}
+                      - if:
+                          condition:
+                            lambda: return (id(front_door_item).state == "unlocked" || id(front_door_item).state == "open");
+                          then:
+                            - homeassistant.action:
+                                action: lock.lock
+                                data:
+                                  entity_id: ${front_door_entity}
+                      - lvgl.page.show: idle_page
+
+    - id: idle_page
+      widgets:
+        - obj:
+            styles: page_content
+            widgets:
+              - obj:
+                  align: TOP_MID
+                  styles: header_footer
+                  widgets:
+                    # ── Left: chevron + LIGHTS — tappable, goes to LIV light control ──
+                    - button:
+                        id: but_home_lights
+                        align: LEFT_MID
+                        x: 4
+                        width: 46%
+                        height: 100%
+                        bg_opa: TRANSP
+                        border_width: 0
+                        shadow_width: 0
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: START
+                          flex_align_cross: CENTER
+                          pad_column: 2
+                        widgets:
+                          - label:
+                              id: ico_home_lights
+                              text_font: iconfont_small
+                              text_color: 0xFFCC00
+                              text: "\U000F0B28"
+                          - label:
+                              id: lbl_home_lights
+                              text_font: my_font12
+                              text_color: 0xFFFFFF
+                              text: "LIGHTS"
+                        on_release:
+                          - lvgl.page.show: liv_lite_page
+                    # ── Right: SETTINGS + chevron — tappable, asks settings_pin ──
+                    - button:
+                        id: but_home_settings
+                        align: RIGHT_MID
+                        x: -4
+                        width: 46%
+                        height: 100%
+                        bg_opa: TRANSP
+                        border_width: 0
+                        shadow_width: 0
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: END
+                          flex_align_cross: CENTER
+                          pad_column: 2
+                        widgets:
+                          - label:
+                              id: lbl_home_settings
+                              text_font: my_font12
+                              text_color: 0xFFFFFF
+                              text: "SETTINGS"
+                          - label:
+                              id: ico_home_settings
+                              text_font: iconfont_small
+                              text_color: 0xAAAAAA
+                              text: "\U000F0B2A"
+                        on_release:
+                          - lvgl.widget.hide: lbl_keypad_error
+                          - lambda: id(alarm_action) = "settings_unlock";
+                          - lvgl.page.show: alarm_keypad_page
+              # ── Home body: clock, date, door status — stacked, no overlap ──
+              - obj:
+                  id: home_body
+                  align: TOP_MID
+                  y: 50
+                  width: 100%
+                  height: 170
+                  pad_all: 0
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    type: FLEX
+                    flex_flow: COLUMN
+                    flex_align_main: CENTER
+                    flex_align_cross: CENTER
+                    pad_row: 4
+                  widgets:
+                    - label:
+                        id: home_clock_label
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        text_font: montserrat_48
+                    - label:
+                        id: home_date_label
+                        text_align: CENTER
+                        text_color: 0xCCCCCC
+                        text_font: my_font22
+                    - obj:
+                        id: home_door_status_row
+                        width: 100%
+                        height: 30
+                        pad_all: 0
+                        bg_opa: TRANSP
+                        border_opa: TRANSP
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: CENTER
+                          flex_align_cross: CENTER
+                          pad_column: 4
+                        widgets:
+                          - label:
+                              id: ico_home_door_status
+                              text_font: iconfont_small
+                              text_color: 0xCCCCCC
+                              text: "\U000F033F"
+                          - label:
+                              id: lbl_home_door_status
+                              text_align: CENTER
+                              text_font: labelfont_large
+                              text_color: 0xCCCCCC
+                              text: '${front_door_name}: --'
+                    - label:
+                        id: lbl_home_door_alarm_status
+                        text_align: CENTER
+                        text_font: my_font16
+                        text_color: 0xCCCCCC
+                        text: '${door_alarm_door_name}: --'
+              # ── No HA Connection status (replaces old full-screen no-connection page) ──
+              - label:
+                  id: lbl_no_ha_connection
+                  hidden: true
+                  align: BOTTOM_MID
+                  y: -14
+                  text_align: CENTER
+                  text_font: my_font16
+                  text_color: red
+                  text: "No HA Connection"
+
+    - id: alarm_keypad_page
+      skip: true
+      widgets:
+        - obj:
+            styles: page_content
+            widgets:
+              - obj:
+                  align: TOP_MID
+                  styles: header_footer 
+                  widgets:
+                    - label:
+                        text: '${keypad_page_title}'
+                        y: 3
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+        - buttonmatrix:
+            id: lvgl_keypad
+            x: 10
+            y: 35
+            width: 300
+            height: 170
+            items:
+              text_font: montserrat_20
+              pressed:
+                bg_color: 0xFFFF00
+            rows:
+              - buttons:
+                  - text: 1
+                    control:
+                      no_repeat: true
+                  - text: 2
+                    control:
+                      no_repeat: true
+                  - text: 3
+                    control:
+                      no_repeat: true
+              - buttons:
+                  - text: 4
+                    control:
+                      no_repeat: true
+                  - text: 5
+                    control:
+                      no_repeat: true
+                  - text: 6
+                    control:
+                      no_repeat: true
+              - buttons:
+                  - text: 7
+                    control:
+                      no_repeat: true
+                  - text: 8
+                    control:
+                      no_repeat: true
+                  - text: 9
+                    control:
+                      no_repeat: true
+              - buttons:
+                  - text: "\uF55A"
+                    key_code: "*"
+                    control:
+                      no_repeat: true
+                  - text: 0
+                    control:
+                      no_repeat: true
+                  - text: "\uF00C"
+                    key_code: "#"
+                    control:
+                      no_repeat: true
+        - label:
+            id: lbl_keypad_error
+            hidden: true
+            text: "Incorrect PIN"
+            align: BOTTOM_MID
+            text_align: CENTER
+            text_color: red
+            text_font: my_font16
+            y: -8
+                        
+    - id: saver_page
+      skip: true
+      widgets:
+        - obj:
+            styles: page_content
+            widgets:
+              - obj:
+                  align: TOP_MID
+                  styles: header_footer 
+                  bg_opa: 30%
+                  widgets:
+                    - label:
+                        text: '${screensaver_page_title}'
+                        y: 3
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+        - obj: # clock digital
+            id: digital
+            height: 185
+            width: 100%
+            align: TOP_MID
+            y: 32
+            pad_all: 0
+            border_width: 0
+            styles: clock_bg
+            widgets:
+              - label:
+                  id: digitaltime
+                  align: CENTER
+                  text_align: CENTER
+                  text_color: 0xFFFFFF
+                  text_font: montserrat_48
+              - label:
+                  id: daydate_label
+                  align: BOTTOM_MID
+                  text_align: CENTER
+                  text_color: 0xFFFFFF
+                  text_font: my_font22
+                  y: -4
+        - label:
+            id: temp_label
+            hidden: true
+            align: TOP_MID
+            text: " "
+            text_align: CENTER
+            styles: clock_style
+            text_color: 0xFFFFFF
+            text_font: my_font12
+            x: -45
+            y: 8
+        - label:
+            id: humidity_label
+            hidden: true
+            align: TOP_MID
+            text_align: CENTER
+            styles: clock_style
+            text_color: 0xFFFFFF
+            text_font: my_font12
+            x: 20
+            y: 8
+        - label:
+            id: temp_ext_label
+            hidden: true
+            align: TOP_RIGHT
+            text: " "
+            text_align: RIGHT
+            styles: clock_style
+            text_color: 0xFFFFFF
+            text_font: labelfont_large
+            x: -15
+            y: 40
+        - label:
+            id: temp_condition_label
+            hidden: true
+            align: TOP_RIGHT
+            text_align: RIGHT
+            styles: clock_style
+            text_color: 0xFFFFFF
+            text_font: icon_font_30
+            x: -15
+            y: 60
+        - label:
+            id: lower_left_label
+            hidden: true
+            align: BOTTOM_LEFT
+            text_align: LEFT
+            styles: clock_style
+            text_color: 0xFFFFFF
+            text_font: labelfont_large
+            x: 15
+            y: -15
+        - label:
+            id: lower_right_label
+            hidden: true
+            align: BOTTOM_RIGHT
+            text_align: RIGHT
+            styles: clock_style
+            text_color: 0xFFFFFF
+            text_font: labelfont_large
+            x: -15
+            y: -15
+        - label:
+            id: lbl_saver_door_alarm_status
+            align: TOP_MID
+            text_align: CENTER
+            styles: clock_style
+            text_color: 0xCCCCCC
+            text_font: my_font12
+            x: -110
+            y: 8
+            text: 'DA: --'
+        - label:
+            id: lbl_saver_front_door_lock_door_status
+            align: TOP_MID
+            text_align: CENTER
+            styles: clock_style
+            text_color: 0xCCCCCC
+            text_font: my_font12
+            x: 85
+            y: 8
+            text: 'DS: --'
+
+    - id: liv_lite_page
+      skip: true
+      widgets:
+        - obj:
+            styles: page_content
+            widgets:
+              - obj:
+                  align: TOP_MID
+                  styles: header_footer
+                  widgets:
+                    - label:
+                        text: '${lights1_name}'
+                        y: 3
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                    - button:
+                        align: RIGHT_MID
+                        x: -4
+                        width: 36
+                        height: 22
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        widgets:
+                          - label:
+                              text_font: iconfont_small
+                              align: CENTER
+                              text_color: 0xFFFFFF
+                              text: "\U000F004D"
+                        on_release:
+                          then:
+                            - lvgl.page.show: idle_page
+              - obj:
+                  align: CENTER
+                  width: 100%
+                  height: 210
+                  y: 15
+                  pad_top: 6
+                  pad_bottom: 6
+                  pad_left: 8
+                  pad_right: 8
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  scrollable: true
+                  scroll_dir: VER
+                  layout:
+                    type: FLEX
+                    flex_flow: COLUMN
+                    flex_align_main: START
+                    flex_align_cross: CENTER
+                    pad_row: 8
+                  widgets:
+                    # Toggle + Daylight reset row
+                    - obj:
+                        width: 100%
+                        height: 50
+                        bg_opa: TRANSP
+                        border_opa: TRANSP
+                        pad_all: 0
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: CENTER
+                          flex_align_cross: CENTER
+                          pad_column: 12
+                        widgets:
+                          - button:
+                              id: btn_light_widget_toggle
+                              styles: button_style
+                              pressed:
+                                styles: button_pressed_style
+                              checked:
+                                styles: button_checked_style
+                              checkable: true
+                              width: 90
+                              height: 46
+                              widgets:
+                                - label:
+                                    id: ico_light_widget
+                                    align: CENTER
+                                    text_font: icon_font_55
+                                    text_color: 0x888888
+                                    text: "\U000F0335"
+                              on_release:
+                                then:
+                                  - homeassistant.action:
+                                      action: homeassistant.toggle
+                                      data:
+                                        entity_id: ${light_widget_entity}
+                          - label:
+                              text: '${lights1_name}'
+                              text_font: my_font16
+                              text_color: 0xCCCCCC
+                              align: CENTER
+                          - button:
+                              id: btn_daylight_reset
+                              styles: button_style
+                              pressed:
+                                styles: button_pressed_style
+                              width: 90
+                              height: 46
+                              widgets:
+                                - label:
+                                    align: CENTER
+                                    text_font: iconfont_small
+                                    text_color: 0xFFEE88
+                                    text: "\U000F0599"
+                                - label:
+                                    align: BOTTOM_MID
+                                    y: -2
+                                    text_font: my_font12
+                                    text_color: 0xCCCCCC
+                                    text: "Daylight"
+                              on_release:
+                                then:
+                                  - homeassistant.service:
+                                      service: light.turn_on
+                                      data:
+                                        entity_id: ${light_widget_entity}
+                                        color_temp_kelvin: "4000"
+                                        brightness_pct: "100"
+                                  - lvgl.slider.update:
+                                      id: slider_light_brightness
+                                      value: 100
+                                  - lvgl.label.update:
+                                      id: lbl_brightness_pct
+                                      text: "100%"
+                                  - lvgl.slider.update:
+                                      id: slider_color_temp
+                                      value: 4000
+                    # Dim slider row
+                    - obj:
+                        width: 100%
+                        height: 30
+                        bg_opa: TRANSP
+                        border_opa: TRANSP
+                        pad_all: 0
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_cross: CENTER
+                          pad_column: 8
+                        widgets:
+                          - label:
+                              text_font: iconfont_small
+                              text_color: 0xFFCC00
+                              text: "\U000F00DF"
+                          - slider:
+                              id: slider_light_brightness
+                              value: 50
+                              min_value: 0
+                              max_value: 100
+                              width: 195
+                              height: 18
+                              indicator:
+                                bg_color: 0xFFCC00
+                                bg_grad_color: 0xFF8800
+                                bg_grad_dir: HOR
+                              knob:
+                                bg_color: 0xFFCC00
+                                bg_grad_color: 0xFFAA00
+                              on_value:
+                                - lvgl.label.update:
+                                    id: lbl_brightness_pct
+                                    text: !lambda |-
+                                      char buf[8];
+                                      sprintf(buf, "%d%%", (int)x);
+                                      return buf;
+                              on_release:
+                                - homeassistant.service:
+                                    service: light.turn_on
+                                    data:
+                                      entity_id: ${light_widget_entity}
+                                      brightness_pct: !lambda return (int)lv_slider_get_value(id(slider_light_brightness));
+                          - label:
+                              id: lbl_brightness_pct
+                              text_color: 0xCCCCCC
+                              text_font: my_font12
+                              text: "50%"
+                    # Color temp slider row
+                    - obj:
+                        width: 100%
+                        height: 30
+                        bg_opa: TRANSP
+                        border_opa: TRANSP
+                        pad_all: 0
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_cross: CENTER
+                          pad_column: 8
+                        widgets:
+                          - label:
+                              text_font: iconfont_small
+                              text_color: 0x88CCFF
+                              text: "\U000F0599"
+                          - slider:
+                              id: slider_color_temp
+                              value: 4000
+                              min_value: 2000
+                              max_value: 6500
+                              width: 195
+                              height: 18
+                              indicator:
+                                bg_color: 0x88CCFF
+                                bg_grad_color: 0xFF8800
+                                bg_grad_dir: HOR
+                              knob:
+                                bg_color: 0xFFFFFF
+                              on_release:
+                                - homeassistant.service:
+                                    service: light.turn_on
+                                    data:
+                                      entity_id: ${light_widget_entity}
+                                      color_temp_kelvin: !lambda return (int)lv_slider_get_value(id(slider_color_temp));
+                                      brightness_pct: !lambda return (int)lv_slider_get_value(id(slider_light_brightness));
+                          - label:
+                              text_font: my_font12
+                              text_color: 0xCCCCCC
+                              text: "K"
+                    - label:
+                        text: "— Colour —"
+                        text_font: my_font12
+                        text_color: 0xAAAAAA
+                        width: 100%
+                        text_align: CENTER
+                    ## Colour swatches row 1
+                    - obj:
+                        width: 100%
+                        height: 32
+                        bg_opa: TRANSP
+                        border_opa: TRANSP
+                        pad_all: 0
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: CENTER
+                          flex_align_cross: CENTER
+                          pad_column: 4
+                        widgets:
+                          - button:
+                              width: 68
+                              height: 28
+                              radius: 4
+                              bg_color: 0xFF2222
+                              bg_opa: COVER
+                              border_color: 0x555555
+                              border_width: 1
+                              shadow_opa: TRANSP
+                              widgets:
+                                - label:
+                                    align: CENTER
+                                    text_font: my_font12
+                                    text_color: 0xFFFFFF
+                                    text: "Red"
+                              on_release:
+                                - homeassistant.service:
+                                    service: light.turn_on
+                                    data:
+                                      entity_id: ${light_widget_entity}
+                                    data_template:
+                                      rgb_color: "[255, 34, 34]"
+                          - button:
+                              width: 68
+                              height: 28
+                              radius: 4
+                              bg_color: 0xFF7700
+                              bg_opa: COVER
+                              border_color: 0x555555
+                              border_width: 1
+                              shadow_opa: TRANSP
+                              widgets:
+                                - label:
+                                    align: CENTER
+                                    text_font: my_font12
+                                    text_color: 0xFFFFFF
+                                    text: "Orange"
+                              on_release:
+                                - homeassistant.service:
+                                    service: light.turn_on
+                                    data:
+                                      entity_id: ${light_widget_entity}
+                                    data_template:
+                                      rgb_color: "[255, 119, 0]"
+                          - button:
+                              width: 68
+                              height: 28
+                              radius: 4
+                              bg_color: 0xFFEE00
+                              bg_opa: COVER
+                              border_color: 0x555555
+                              border_width: 1
+                              shadow_opa: TRANSP
+                              widgets:
+                                - label:
+                                    align: CENTER
+                                    text_font: my_font12
+                                    text_color: 0x333333
+                                    text: "Yellow"
+                              on_release:
+                                - homeassistant.service:
+                                    service: light.turn_on
+                                    data:
+                                      entity_id: ${light_widget_entity}
+                                    data_template:
+                                      rgb_color: "[255, 238, 0]"
+                          - button:
+                              width: 68
+                              height: 28
+                              radius: 4
+                              bg_color: 0x00DD00
+                              bg_opa: COVER
+                              border_color: 0x555555
+                              border_width: 1
+                              shadow_opa: TRANSP
+                              widgets:
+                                - label:
+                                    align: CENTER
+                                    text_font: my_font12
+                                    text_color: 0xFFFFFF
+                                    text: "Green"
+                              on_release:
+                                - homeassistant.service:
+                                    service: light.turn_on
+                                    data:
+                                      entity_id: ${light_widget_entity}
+                                    data_template:
+                                      rgb_color: "[0, 221, 0]"
+                    ## Colour swatches row 2
+                    - obj:
+                        width: 100%
+                        height: 32
+                        bg_opa: TRANSP
+                        border_opa: TRANSP
+                        pad_all: 0
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: CENTER
+                          flex_align_cross: CENTER
+                          pad_column: 4
+                        widgets:
+                          - button:
+                              width: 68
+                              height: 28
+                              radius: 4
+                              bg_color: 0x00BBBB
+                              bg_opa: COVER
+                              border_color: 0x555555
+                              border_width: 1
+                              shadow_opa: TRANSP
+                              widgets:
+                                - label:
+                                    align: CENTER
+                                    text_font: my_font12
+                                    text_color: 0xFFFFFF
+                                    text: "Teal"
+                              on_release:
+                                - homeassistant.service:
+                                    service: light.turn_on
+                                    data:
+                                      entity_id: ${light_widget_entity}
+                                    data_template:
+                                      rgb_color: "[0, 187, 187]"
+                          - button:
+                              width: 68
+                              height: 28
+                              radius: 4
+                              bg_color: 0x00AAFF
+                              bg_opa: COVER
+                              border_color: 0x555555
+                              border_width: 1
+                              shadow_opa: TRANSP
+                              widgets:
+                                - label:
+                                    align: CENTER
+                                    text_font: my_font12
+                                    text_color: 0xFFFFFF
+                                    text: "Sky"
+                              on_release:
+                                - homeassistant.service:
+                                    service: light.turn_on
+                                    data:
+                                      entity_id: ${light_widget_entity}
+                                    data_template:
+                                      rgb_color: "[0, 170, 255]"
+                          - button:
+                              width: 68
+                              height: 28
+                              radius: 4
+                              bg_color: 0x2244FF
+                              bg_opa: COVER
+                              border_color: 0x555555
+                              border_width: 1
+                              shadow_opa: TRANSP
+                              widgets:
+                                - label:
+                                    align: CENTER
+                                    text_font: my_font12
+                                    text_color: 0xFFFFFF
+                                    text: "Blue"
+                              on_release:
+                                - homeassistant.service:
+                                    service: light.turn_on
+                                    data:
+                                      entity_id: ${light_widget_entity}
+                                    data_template:
+                                      rgb_color: "[34, 68, 255]"
+                          - button:
+                              width: 68
+                              height: 28
+                              radius: 4
+                              bg_color: 0xAA00FF
+                              bg_opa: COVER
+                              border_color: 0x555555
+                              border_width: 1
+                              shadow_opa: TRANSP
+                              widgets:
+                                - label:
+                                    align: CENTER
+                                    text_font: my_font12
+                                    text_color: 0xFFFFFF
+                                    text: "Purple"
+                              on_release:
+                                - homeassistant.service:
+                                    service: light.turn_on
+                                    data:
+                                      entity_id: ${light_widget_entity}
+                                    data_template:
+                                      rgb_color: "[170, 0, 255]"
+                    ## Colour swatches row 3
+                    - obj:
+                        width: 100%
+                        height: 32
+                        bg_opa: TRANSP
+                        border_opa: TRANSP
+                        pad_all: 0
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: CENTER
+                          flex_align_cross: CENTER
+                          pad_column: 4
+                        widgets:
+                          - button:
+                              width: 68
+                              height: 28
+                              radius: 4
+                              bg_color: 0xFF00BB
+                              bg_opa: COVER
+                              border_color: 0x555555
+                              border_width: 1
+                              shadow_opa: TRANSP
+                              widgets:
+                                - label:
+                                    align: CENTER
+                                    text_font: my_font12
+                                    text_color: 0xFFFFFF
+                                    text: "Pink"
+                              on_release:
+                                - homeassistant.service:
+                                    service: light.turn_on
+                                    data:
+                                      entity_id: ${light_widget_entity}
+                                    data_template:
+                                      rgb_color: "[255, 0, 187]"
+                          - button:
+                              width: 68
+                              height: 28
+                              radius: 4
+                              bg_color: 0xFF4488
+                              bg_opa: COVER
+                              border_color: 0x555555
+                              border_width: 1
+                              shadow_opa: TRANSP
+                              widgets:
+                                - label:
+                                    align: CENTER
+                                    text_font: my_font12
+                                    text_color: 0xFFFFFF
+                                    text: "Rose"
+                              on_release:
+                                - homeassistant.service:
+                                    service: light.turn_on
+                                    data:
+                                      entity_id: ${light_widget_entity}
+                                    data_template:
+                                      rgb_color: "[255, 68, 136]"
+                          - button:
+                              width: 68
+                              height: 28
+                              radius: 4
+                              bg_color: 0xFFBB55
+                              bg_opa: COVER
+                              border_color: 0x555555
+                              border_width: 1
+                              shadow_opa: TRANSP
+                              widgets:
+                                - label:
+                                    align: CENTER
+                                    text_font: my_font12
+                                    text_color: 0x333333
+                                    text: "Peach"
+                              on_release:
+                                - homeassistant.service:
+                                    service: light.turn_on
+                                    data:
+                                      entity_id: ${light_widget_entity}
+                                    data_template:
+                                      rgb_color: "[255, 187, 85]"
+                          - button:
+                              width: 68
+                              height: 28
+                              radius: 4
+                              bg_color: 0xFFFFFF
+                              bg_opa: COVER
+                              border_color: 0x555555
+                              border_width: 1
+                              shadow_opa: TRANSP
+                              widgets:
+                                - label:
+                                    align: CENTER
+                                    text_font: my_font12
+                                    text_color: 0x333333
+                                    text: "White"
+                              on_release:
+                                - homeassistant.service:
+                                    service: light.turn_on
+                                    data:
+                                      entity_id: ${light_widget_entity}
+                                    data_template:
+                                      rgb_color: "[255, 255, 255]"
+
+    - id: settings_hub_page
+      skip: true
+      widgets:
+        - obj:
+            styles: page_content
+            widgets:
+              - obj:
+                  align: TOP_MID
+                  styles: header_footer 
+                  widgets:
+                    - label:
+                        text: "Settings"
+                        y: 3
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+              - obj:
+                  align: CENTER
+                  width: 100%
+                  height: ${page_content_height}
+                  pad_all: 6
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    pad_row: 6
+                    pad_column: 8
+                    type: GRID
+                    grid_columns: [FR(1), FR(1), FR(1)]
+                    grid_rows: [FR(10), FR(40), FR(10), FR(40)]
+                  widgets:
+                    - label:
+                        text: "Wi-Fi"
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                    - button:
+                        id: but_settings_1
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              id: ico_settings_1
+                              align: CENTER
+                              text_font: icon_font_55
+                              text: "\U000F05A9"
+                        on_release:
+                          - lvgl.page.show: wifi_page
+                    - label:
+                        text: "Screensaver"
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                    - button:
+                        id: but_settings_2
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              id: ico_settings_2
+                              align: CENTER
+                              text_font: icon_font_55
+                              text: "\U000F0D90"
+                        on_release:
+                          - lvgl.page.show: ss_set_page
+                    - label:
+                        text: "Info"
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                    - button:
+                        id: but_settings_3
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              id: ico_settings_3
+                              align: CENTER
+                              text_font: icon_font_55
+                              text: "\U000F1C6F"
+                        on_release:
+                          - lvgl.page.show: info_page
+                    - label:
+                        text: "Device"
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                    - button:
+                        id: but_settings_4
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 3
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              id: ico_settings_4
+                              align: CENTER
+                              text_font: icon_font_55
+                              text: "\U000F08D6"
+                        on_release:
+                          - lvgl.page.show: device_set_page
+                    - label:
+                        text: "UI"
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                    - button:
+                        id: but_settings_5
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 3
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              id: ico_settings_5
+                              align: CENTER
+                              text_font: icon_font_55
+                              text: "\U000F0502"
+                        on_release:
+                          - lvgl.page.show: ui_set_page
+                    - label:
+                        text: "Lock"
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                    - button:
+                        id: but_settings_6
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 3
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              id: ico_settings_6
+                              align: CENTER
+                              text_font: icon_font_55
+                              text: "\U000F033E"
+                        on_release:
+                          - lvgl.page.show: lock_set_page
+
+    - id: lock_set_page
+      skip: true
+      widgets:
+        - obj:
+            styles: page_content
+            widgets:
+              - obj:
+                  align: TOP_MID
+                  styles: header_footer 
+                  widgets:
+                    - label:
+                        text: "Lock"
+                        y: 3
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+              - obj:
+                  align: CENTER
+                  width: 100%
+                  height: ${page_content_height}
+                  pad_all: 6
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    pad_row: 6
+                    pad_column: 8
+                    type: GRID
+                    grid_columns: [FR(1), FR(1)]
+                    grid_rows: [FR(25), FR(25), FR(25), FR(25)]
+                  widgets:
+                    - checkbox:
+                        id: chk_front_door_pin
+                        text: "Require PIN to Unlock"
+                        align: LEFT_MID
+                        text_align: LEFT
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                        on_change:
+                          switch.toggle: front_door_require_pin
+
+    - id: ss_set_page
+      skip: true
+      widgets:
+        - obj:
+            styles: page_content
+            widgets:
+              - obj:
+                  align: TOP_MID
+                  styles: header_footer 
+                  widgets:
+                    - label:
+                        text: "Screensaver"
+                        y: 3
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+              - obj:
+                  align: CENTER
+                  width: 100%
+                  height: ${page_content_height}
+                  pad_all: 6
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    pad_row: 6
+                    pad_column: 8
+                    type: GRID
+                    grid_columns: [FR(1), FR(1)]
+                    grid_rows: [FR(25), FR(25), FR(25), FR(25)]
+                  widgets:
+                    - checkbox:
+                        id: chk_screensaver
+                        text: "Screensaver"
+                        align: LEFT_MID
+                        text_align: LEFT
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                        on_change:
+                          switch.toggle: s_saver
+                    - button:
+                        id: but_ss_set_1
+                        styles: button_standard_style
+                        bg_grad_dir: VER
+                        pressed:
+                          bg_color: 0x006699
+                          bg_grad_color: 0x00334d
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: CENTER
+                        grid_cell_y_align: CENTER
+                        widgets:
+                          - label:
+                              id: ico_ss_set_1
+                              align: CENTER
+                              text: "Settings"
+                        on_release:
+                          - lvgl.page.show: timeout_settings_page
+                    - checkbox:
+                        id: chk_wake_presence
+                        text: "Wake On Presence"
+                        align: LEFT_MID
+                        text_align: LEFT
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                        on_change:
+                          switch.toggle: s_saver_presc
+                    - checkbox:
+                        id: chk_timeout_blank
+                        text: "Turn Screen Off"
+                        align: LEFT_MID
+                        text_align: LEFT
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                        on_change:
+                          switch.toggle: s_saver_mode
+
+    - id: timeout_settings_page
+      skip: true
+      widgets:
+        - obj:
+            styles: page_content
+            widgets:
+              - obj:
+                  align: TOP_MID
+                  styles: header_footer 
+                  widgets:
+                    - label:
+                        text: "Screensaver"
+                        y: 3
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+              - obj:
+                  align: CENTER
+                  width: 100%
+                  height: ${page_content_height}
+                  pad_all: 6
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    pad_row: 6
+                    pad_column: 8
+                    type: GRID
+                    grid_columns: [FR(1), FR(1)]
+                    grid_rows: [FR(10), FR(40), FR(10), FR(40)]
+                  widgets:
+                    - label:
+                        text: "Scr Delay Secs"
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                    - obj:
+                         align: CENTER
+                         grid_cell_column_pos: 0
+                         grid_cell_row_pos: 1
+                         grid_cell_x_align: STRETCH
+                         grid_cell_y_align: STRETCH
+                         bg_color: 0x000000
+                         bg_opa: TRANSP
+                         border_opa: TRANSP
+                         width: 100%
+                         height: 100%
+                         pad_all: 0
+                         layout:
+                           type: FLEX
+                           flex_flow: ROW
+                           flex_align_cross: CENTER
+                         widgets:
+                           - button:
+                               id: delay_spin_down
+                               styles: button_style
+                               pad_all: 7
+                               pressed:
+                                 styles: button_pressed_style
+                               checked:
+                                 styles: button_checked_style
+                               on_short_click:
+                                 - lvgl.spinbox.decrement: spinbox_delay
+                               on_long_press_repeat:
+                                 - lvgl.spinbox.decrement: spinbox_delay
+                                 - delay: 1s
+                               widgets:
+                                 - label:
+                                      text: "\U000F0B26"
+                                      styles: spinbox_button_label_style
+                           - spinbox:
+                               id: spinbox_delay
+                               styles: spinbox_style
+                               width: 50
+                               range_from: 10
+                               range_to: 999999
+                               selected_digit: 0
+                               rollover: false
+                               digits: 4
+                               decimal_places: 0
+                               on_value:
+                                 then:
+                                   if: 
+                                     condition:
+                                       lambda: return (x != id(s_saver_delay).state);
+                                     then:
+                                       - number.set:
+                                           id: s_saver_delay
+                                           value: !lambda return x;
+                           - button:
+                               id: delay_spin_up
+                               styles: button_style
+                               pad_all: 7
+                               pressed:
+                                 styles: button_pressed_style
+                               checked:
+                                 styles: button_checked_style
+                               on_short_click:
+                                 - lvgl.spinbox.increment: spinbox_delay
+                               on_long_press_repeat:
+                                 - lvgl.spinbox.increment: spinbox_delay
+                                 - delay: 1s
+                               widgets:
+                                 - label:
+                                      text: "\U000F0B2C"
+                                      styles: spinbox_button_label_style
+                    - label:
+                        text: "Screen Off Delay"
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                    - obj:
+                         align: CENTER
+                         grid_cell_column_pos: 1
+                         grid_cell_row_pos: 1
+                         grid_cell_x_align: STRETCH
+                         grid_cell_y_align: STRETCH
+                         bg_color: 0x000000
+                         bg_opa: TRANSP
+                         border_opa: TRANSP
+                         width: 100%
+                         height: 100%
+                         pad_all: 0
+                         layout:
+                           type: FLEX
+                           flex_flow: ROW
+                           flex_align_cross: CENTER
+                         widgets:
+                           - button:
+                               id: scr_delay_spin_down
+                               styles: button_style
+                               pad_all: 7
+                               pressed:
+                                 styles: button_pressed_style
+                               checked:
+                                 styles: button_checked_style
+                               on_short_click:
+                                 - lvgl.spinbox.decrement: spinbox_scr_delay
+                               on_long_press_repeat:
+                                 - lvgl.spinbox.decrement: spinbox_scr_delay
+                                 - delay: 1s
+                               widgets:
+                                 - label:
+                                     text: "\U000F0B26"
+                                     styles: spinbox_button_label_style
+                           - spinbox:
+                               id: spinbox_scr_delay
+                               styles: spinbox_style
+                               width: 50
+                               range_from: 10
+                               range_to: 999999
+                               selected_digit: 0
+                               rollover: false
+                               digits: 4
+                               decimal_places: 0
+                               on_value:
+                                 then:
+                                   if: 
+                                     condition:
+                                       lambda: return (x != id(s_saver_blank_delay).state);
+                                     then:
+                                       - number.set:
+                                           id: s_saver_blank_delay
+                                           value: !lambda return x;
+                           - button:
+                               id: scr_delay_spin_up
+                               styles: button_style
+                               pad_all: 7
+                               pressed:
+                                 styles: button_pressed_style
+                               checked:
+                                 styles: button_checked_style
+                               on_short_click:
+                                 - lvgl.spinbox.increment: spinbox_scr_delay
+                               on_long_press_repeat:
+                                 - lvgl.spinbox.increment: spinbox_scr_delay
+                               widgets:
+                                 - label:
+                                     text: "\U000F0B2C"
+                                     styles: spinbox_button_label_style
+              - obj:
+                   align: CENTER
+                   y: 75
+                   bg_color: 0x000000
+                   bg_opa: TRANSP
+                   border_opa: TRANSP
+                   width: 90%
+                   height: 50
+                   pad_all: 0
+                   layout:
+                     type: FLEX
+                     flex_flow: ROW
+                     flex_align_cross: CENTER
+                   widgets:
+                    - label:
+                        id: ico_dimbrightness_1
+                        align: CENTER
+                        text_font: iconfont_small
+                        text_color: yellow
+                        text: "\U000F00DF"
+                    - slider:
+                        id: slider_dimbrightness
+                        value: 100
+                        min_value: 20
+                        max_value: 100
+                        width: 230
+                        height: 15
+                        indicator:
+                          bg_color: yellow
+                          bg_grad_color: 0xcccc00
+                        knob:
+                          bg_color: yellow
+                          bg_grad_color: 0xe6e600
+                        on_value:
+                          - if:
+                              condition:
+                                lambda: return (x != id(s_saver_brightness).state);
+                              then:
+                                - number.set:
+                                    id: s_saver_brightness
+                                    value: !lambda return x;
+                                     
+    - id: info_page
+      skip: true
+      widgets:
+        - obj:
+            styles: page_content
+            widgets:
+              - obj:
+                  align: TOP_MID
+                  styles: header_footer 
+                  widgets:
+                    - label:
+                        text: "Info"
+                        y: 3
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+              - obj:
+                  align: CENTER
+                  width: 100%
+                  height: ${page_content_height}
+                  pad_all: 2
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    pad_row: 2
+                    pad_column: 0
+                    type: GRID
+                    grid_columns: [FR(1)]
+                    grid_rows: [FR(1), FR(1), FR(1), FR(1), FR(1), FR(1), FR(1), FR(1)]
+                  widgets:
+                    - label:
+                        id: lbl_ip_title
+                        width: 100%
+                        text_align: CENTER
+                        text: "IP Address"
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: CENTER
+                    - label:
+                        id: lbl_ip
+                        width: 100%
+                        text_align: CENTER
+                        text: " "
+                        text_color: blue
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: CENTER
+                    - label:
+                        id: lbl_host_title
+                        width: 100%
+                        text_align: CENTER
+                        text: "Host Name"
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: CENTER
+                    - label:
+                        id: lbl_host
+                        width: 100%
+                        text_align: CENTER
+                        text: !lambda |-
+                          char buf[30];
+                          sprintf(buf, "%s", "${name}.local");
+                          return buf;
+                        text_color: blue
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 3
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: CENTER
+                    - label:
+                        id: lbl_uptime_title
+                        width: 100%
+                        text_align: CENTER
+                        text: "Uptime D:H:M:S"
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 4
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: CENTER
+                    - label:
+                        id: lbl_uptime
+                        width: 100%
+                        text_align: CENTER
+                        text: " "
+                        text_color: blue
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 5
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: CENTER
+                    - label:
+                        id: lbl_battery_title
+                        hidden: true
+                        width: 100%
+                        text_align: CENTER
+                        text: "Battery Level"
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 6
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: CENTER
+                    - label:
+                        id: lbl_battery
+                        hidden: true
+                        width: 100%
+                        text_align: CENTER
+                        text: " "
+                        text_color: blue
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 7
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: CENTER
+
+    - id: device_set_page
+      skip: true
+      widgets:
+        - obj:
+            styles: page_content
+            widgets:
+              - obj:
+                  align: TOP_MID
+                  styles: header_footer 
+                  widgets:
+                    - label:
+                        text: "Device"
+                        y: 3
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+              - obj:
+                  align: CENTER
+                  width: 100%
+                  height: ${page_content_height}
+                  pad_all: 6
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    pad_row: 6
+                    pad_column: 8
+                    type: GRID
+                    grid_columns: [FR(1), FR(1)]
+                    grid_rows: [FR(26), FR(26), FR(26), FR(21)]
+                  widgets:
+                    - label:
+                        text: "Temp Offset (C)"
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                    - obj:
+                         align: CENTER
+                         grid_cell_column_pos: 1
+                         grid_cell_row_pos: 1
+                         grid_cell_x_align: STRETCH
+                         grid_cell_y_align: STRETCH
+                         bg_color: 0x000000
+                         bg_opa: TRANSP
+                         border_opa: TRANSP
+                         width: 100%
+                         height: 100%
+                         pad_all: 0
+                         layout:
+                           type: FLEX
+                           flex_flow: ROW
+                           flex_align_cross: CENTER
+                         widgets:
+                           - button:
+                               id: temp_offset_spin_down
+                               styles: button_style
+                               pad_all: 6
+                               pressed:
+                                 styles: button_pressed_style
+                               checked:
+                                 styles: button_checked_style
+                               on_short_click:
+                                 - lvgl.spinbox.decrement: spinbox_temp_offset
+                               on_long_press_repeat:
+                                 - lvgl.spinbox.decrement: spinbox_temp_offset
+                                 - delay: 1s
+                               widgets:
+                                 - label:
+                                     text: "\U000F0B26"
+                                     styles: spinbox_button_label_style
+                           - spinbox:
+                               id: spinbox_temp_offset
+                               styles: spinbox_style
+                               pad_all: 3
+                               width: 50
+                               max_height: 42px
+                               range_from: -10.0
+                               range_to: 10.0
+                               selected_digit: 0
+                               rollover: false
+                               digits: 2
+                               decimal_places: 1
+                               text_font: my_font12
+                           - button:
+                               id: temp_offset_spin_up
+                               styles: button_style
+                               pad_all: 6
+                               pressed:
+                                 styles: button_pressed_style
+                               checked:
+                                 styles: button_checked_style
+                               on_short_click:
+                                 - lvgl.spinbox.increment: spinbox_temp_offset
+                               on_long_press_repeat:
+                                 - lvgl.spinbox.increment: spinbox_temp_offset
+                                 - delay: 1s
+                               widgets:
+                                 - label:
+                                     text: "\U000F0B2C"
+                                     styles: spinbox_button_label_style
+
+              - obj:
+                   align: CENTER
+                   y: 75
+                   bg_color: 0x000000
+                   bg_opa: TRANSP
+                   border_opa: TRANSP
+                   width: 90%
+                   height: 50
+                   pad_all: 0
+                   layout:
+                     type: FLEX
+                     flex_flow: ROW
+                     flex_align_cross: CENTER
+                   widgets:
+                    - label:
+                        id: ico_brightness_1
+                        align: CENTER
+                        text_font: iconfont_small
+                        text_color: yellow
+                        text: "\U000F00DF"
+                    - slider:
+                        id: slider_brightness
+                        value: 100
+                        min_value: 20
+                        max_value: 100
+                        width: 230
+                        height: 15
+                        indicator:
+                          bg_color: yellow
+                          bg_grad_color: 0xcccc00
+                        knob:
+                          bg_color: yellow
+                          bg_grad_color: 0xe6e600
+                        on_value:
+                          - if:
+                              condition:
+                                lambda: return (x != id(s_default_brightness).state);
+                              then:
+                                - number.set:
+                                    id: s_default_brightness
+                                    value: !lambda return x;
+                                    
+    - id: ui_set_page
+      skip: true
+      widgets:
+        - obj:
+            styles: page_content
+            widgets:
+              - obj:
+                  align: TOP_MID
+                  styles: header_footer 
+                  widgets:
+                    - label:
+                        text: "UI"
+                        y: 3
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+              - obj:
+                  align: CENTER
+                  width: 100%
+                  height: ${page_content_height}
+                  pad_all: 6
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    pad_row: 6
+                    pad_column: 8
+                    type: GRID
+                    grid_columns: [FR(1), FR(1)]
+                    grid_rows: [FR(25), FR(25), FR(25), FR(25)]
+                  widgets:
+                    - label:
+                        text: "Time Format"
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: END
+                        grid_cell_y_align: CENTER
+                    - dropdown:
+                        id: dropdown_timeformat
+                        styles: dropdown_style
+                        align: CENTER
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        options:
+                          - 12 Hr
+                          - 24 Hr
+                        dropdown_list:
+                          selected:
+                            checked:
+                              text_color: 0xFF0000
+                    - label:
+                        text: "Screensaver Clock"
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: END
+                        grid_cell_y_align: CENTER
+                    - dropdown:
+                        id: dropdown_ssclock
+                        styles: dropdown_style
+                        align: CENTER
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        options:
+                          - Analog
+                          - Digital
+                        dropdown_list:
+                          selected:
+                            checked:
+                              text_color: 0xFF0000
+                    - label:
+                        text: "Temperature Unit"
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: END
+                        grid_cell_y_align: CENTER
+                    - dropdown:
+                        id: dropdown_tempunit
+                        styles: dropdown_style
+                        align: CENTER
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        options:
+                          - Celsius
+                          - Fahrenheit
+                        dropdown_list:
+                          selected:
+                            checked:
+                              text_color: 0xFF0000
+                        on_value:
+                          - if:
+                              condition:
+                                lambda: return (x == 0);
+                              then:
+                                - select.set_index:
+                                    id: temp_unit
+                                    index: 0
+                              else:
+                                - select.set_index:
+                                    id: temp_unit
+                                    index: 1
+                    - label:
+                        text: "UI Mode"
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 3
+                        grid_cell_x_align: END
+                        grid_cell_y_align: CENTER
+                    - dropdown:
+                        id: dropdown_uimode
+                        styles: dropdown_style
+                        align: CENTER
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 3
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        options:
+                          - Home
+                        dropdown_list:
+                          selected:
+                            checked:
+                              text_color: 0xFF0000
+                        on_value:
+                          - delay: 1s
+                          - script.execute: set_uimode
+
+    - id: wifi_page
+      skip: true
+      widgets:
+        - obj:
+            styles: page_content
+            widgets:
+              - obj:
+                  align: TOP_MID
+                  styles: header_footer 
+                  widgets:
+                    - label:
+                        text: "Wifi"
+                        y: 3
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+              - obj:
+                  align: center
+                  width: 100%
+                  height: ${page_content_height}
+                  pad_all: 0
+                  bg_color: 0x000000
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    type: flex
+                    flex_flow: COLUMN
+                    flex_align_main: CENTER
+                    flex_align_cross: CENTER
+                  widgets:
+                    - label:
+                        id: lbl_ssid_title
+                        text: "SSID"
+                        text_color: 0xFFFFFF
+                        width: 100%
+                        text_align: CENTER
+                    - label:
+                        id: lbl_ssid
+                        text: " "
+                        text_color: blue
+                        width: 100%
+                        text_align: CENTER
+                        flex_grow: 1
+                    - label:
+                        id: lbl_mac_title
+                        text: "MAC"
+                        text_color: 0xFFFFFF
+                        width: 100%
+                        text_align: CENTER
+                    - label:
+                        id: lbl_mac
+                        text: " "
+                        text_color: blue
+                        width: 100%
+                        text_align: CENTER
+                        flex_grow: 1
+                    - label:
+                        id: lbl_ss_title
+                        text: "Signal Strength"
+                        text_color: 0xFFFFFF
+                        width: 100%
+                        text_align: CENTER
+                    - label:
+                        id: lbl_ss
+                        text: " "
+                        text_color: blue
+                        width: 100%
+                        text_align: CENTER
+                        flex_grow: 1
+
+  style_definitions:
+    ##########################################################################
+    ## HOME CARD STYLE — compact rounded cards for home icon grid
+    ##########################################################################
+    - id: home_card_style
+      bg_color: 0x111111
+      bg_grad_color: 0x1A2A3A
+      bg_grad_dir: VER
+      bg_opa: COVER
+      border_color: 0x223344
+      border_width: 1
+      border_opa: 50%
+      radius: 14
+      shadow_color: 0x000000
+      shadow_width: 8
+      shadow_offset_x: 2
+      shadow_offset_y: 2
+      shadow_opa: 40%
+      pad_all: 4
+
+    - id: header_footer
+      bg_color: 0x1d5f96
+      bg_grad_color: 0x004466
+      bg_grad_dir: VER
+      bg_opa: 60%
+      border_opa: TRANSP
+      radius: 0
+      pad_all: 0
+      pad_row: 0
+      pad_column: 0
+      border_color: 0x0077b3
+      text_color: 0xFFFFFF
+      width: 100%
+      height: ${taskbar_height}
+    - id: page_content
+      bg_color: 0x000000
+      width: 100%
+      height: 100%
+      pad_all: 0
+      pad_row: 0
+      pad_column: 0
+      border_width: 0
+    - id: clock_style
+      text_color: 0xFFFFFF
+      text_font: my_font
+    - id: clock_bg
+      bg_color: 0x000000
+    - id: button_style
+      bg_color: 0x000000 #black
+      bg_grad_color: 0x005782 #blue
+      bg_grad_dir: VER
+      bg_opa: COVER
+      border_color: 0x000000
+      border_width: 1
+      text_color: 0xFFFFFF
+      shadow_color: 0xFFFFFF
+      shadow_width: 20
+      shadow_offset_x: 0
+      shadow_offset_y: 0
+      shadow_opa: 50%
+      radius: ${button_radius}
+    - id: button_pressed_style
+      bg_color: 0x666666 #grey
+      bg_grad_color: 0x00334d #dark blue
+      bg_grad_dir: VER
+      shadow_color: 0xFFFFFF
+      shadow_width: 20
+      shadow_offset_x: 0
+      shadow_offset_y: 0
+      shadow_opa: 50%
+      radius: ${button_radius}
+    - id: button_checked_style
+      bg_color: 0x000000 #black
+      bg_grad_color: 0x002233 #darker blue
+      bg_grad_dir: VER
+      text_color: yellow
+      shadow_color: 0xFFFFFF
+      shadow_width: 20
+      shadow_offset_x: 0
+      shadow_offset_y: 0
+      shadow_opa: 50%
+      radius: ${button_radius}
+    - id: button_standard_style
+      bg_color: 0x2F8CD8
+      bg_grad_color: 0x005782
+      shadow_width: 0
+    - id: dropdown_style
+      text_font: montserrat_16
+    - id: spinbox_style
+      text_font: montserrat_16
+      align: CENTER
+      text_align: CENTER
+    - id: spinbox_button_label_style
+      text_font: iconfont_small
+      align: CENTER
+      text_align: CENTER
+
+binary_sensor:
+  # ── Front Door Lock Screen — door status sensors ──────────────────────────
+  - platform: homeassistant
+    id: door_alarm_door_item
+    entity_id: ${door_alarm_door_entity}
+    internal: true
+    trigger_on_initial_state: true
+    on_state:
+      then:
+        - if:
+            condition:
+              lambda: return x;
+            then:
+              - lvgl.label.update:
+                  id: lbl_door_alarm_status
+                  text_color: amber
+                  text: '${door_alarm_door_name}: Open'
+              - lvgl.label.update:
+                  id: lbl_saver_door_alarm_status
+                  text_color: amber
+                  text: 'DA: Open'
+              - lvgl.label.update:
+                  id: lbl_home_door_alarm_status
+                  text_color: amber
+                  text: '${door_alarm_door_name}: Open'
+            else:
+              - lvgl.label.update:
+                  id: lbl_door_alarm_status
+                  text_color: 0xCCCCCC
+                  text: '${door_alarm_door_name}: Closed'
+              - lvgl.label.update:
+                  id: lbl_saver_door_alarm_status
+                  text_color: 0xCCCCCC
+                  text: 'DA: Closed'
+              - lvgl.label.update:
+                  id: lbl_home_door_alarm_status
+                  text_color: 0xCCCCCC
+                  text: '${door_alarm_door_name}: Closed'
+
+  # side physical button
+  - platform: gpio
+    pin:
+      number: ${side_button_pin}
+      mode: INPUT_PULLUP
+      inverted: true
+      ignore_strapping_warning: true
+    id: side_top_button
+    internal: true
+    on_multi_click:
+      - timing:
+          - ON for at least 50ms
+          - OFF for at least 50ms
+        then:
+          - if:
+              condition:
+                - lvgl.page.is_showing: saver_page
+              then:
+                - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
+                - lvgl.page.show: ${default_page}
+                - script.execute: draw_display
+              else:
+                - if:
+                    condition:
+                      - lvgl.page.is_showing: ${default_page}
+                    then:
+                      - script.execute: saver_enabled_manual
+                    else:
+                      - script.execute: draw_display
+          - if:
+              condition:
+                - media_player.is_playing:
+              then:
+                - media_player.stop:
+      - timing:
+          - ON for at least 10s
+        then:
+          - button.press: factory_reset_btn
+
+  # red circle home button
+  - platform: gt911
+    id: home_button
+    index: 0
+    on_press:
+      - if:
+          condition:
+            - media_player.is_playing:
+          then:
+            - media_player.stop:
+      - if:
+          condition:
+            - lvgl.page.is_showing: saver_page
+          then:
+            - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
+            - lvgl.page.show: ${default_page}
+            - script.execute: draw_display
+          else:
+            - if:
+                condition:
+                  - lvgl.page.is_showing: ${default_page}
+                then:
+                  # Home screen: red circle opens the front door lock/unlock control.
+                  # PIN is asked first only if "Require PIN to unlock" is on.
+                  - if:
+                      condition:
+                        switch.is_on: front_door_require_pin
+                      then:
+                        - lvgl.widget.hide: lbl_keypad_error
+                        - lambda: id(alarm_action) = "view_lock_page";
+                        - lvgl.page.show: alarm_keypad_page
+                      else:
+                        - lvgl.page.show: main_lock_page
+                else:
+                  - if:
+                      # Front door lock screen, its keypad, or the light widget —
+                      # all reached directly from home — cancel back to home.
+                      condition:
+                        or:
+                          - lvgl.page.is_showing: main_lock_page
+                          - lvgl.page.is_showing: alarm_keypad_page
+                          - lvgl.page.is_showing: liv_lite_page
+                      then:
+                        - lambda: id(alarm_action) = "";
+                        - lvgl.page.show: idle_page
+                      else:
+                        - if:
+                            # Leaf pages under the Settings hub — back to the hub.
+                            condition:
+                              or:
+                                - lvgl.page.is_showing: lock_set_page
+                                - lvgl.page.is_showing: ss_set_page
+                                - lvgl.page.is_showing: info_page
+                                - lvgl.page.is_showing: device_set_page
+                                - lvgl.page.is_showing: ui_set_page
+                                - lvgl.page.is_showing: wifi_page
+                            then:
+                              - lvgl.page.show: settings_hub_page
+                            else:
+                              - if:
+                                  # Screensaver sub-settings — back to the screensaver settings page.
+                                  condition:
+                                    lvgl.page.is_showing: timeout_settings_page
+                                  then:
+                                    - lvgl.page.show: ss_set_page
+                                  else:
+                                    # Settings hub itself, or anywhere unexpected — back to home.
+                                    - lvgl.page.show: idle_page
+            - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
+            - script.execute: draw_display
+
+  # radar sensor
+  - platform: gpio
+    pin:
+      number: GPIO21
+    name: "Presence detect"
+    disabled_by_default: false
+    device_class: "occupancy"
+    trigger_on_initial_state: true
+    filters:
+      - delayed_off: !lambda return id(radar_delayed_off).state * 1000;
+    on_state:
+      - if:
+          condition:
+            and:
+              - lambda: "return x;"
+              - switch.is_on: s_saver
+              - switch.is_on: s_saver_presc
+              - lambda: return id(wifi_connection) || id(ethernet_connection);
+              - lambda: return id(api_connection);
+          then:
+            - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
+            - lvgl.page.show: ${default_page}
+            - script.execute: draw_display
+
+################## config end ############################
