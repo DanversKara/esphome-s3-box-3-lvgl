@@ -1,1 +1,1 @@
-
+this copy is a strip down copy that is very basic and kinda starting over from the OG work to give me what i want only, no Ai Voice, i this device sucks to use it and waste of memory, space and network, might as well use my google tv and remove unused code to use for something i do use. i removed a lot of unused code, this Diet Secure will be my start point for only things i want
