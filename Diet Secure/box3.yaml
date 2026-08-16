@@ -117,6 +117,7 @@ substitutions:
   # ── Front Door Lock Screen ────────────────────────────────────────────────
   front_door_name: ""
   front_door_entity: lock.front_door_lock  ## ← change to your front door lock entity id
+  front_door_lock_door_entity: binary_sensor.front_door_lock_door  ## ← door open/closed sensor built into the lock; drives the Welcome Home reconnect popup
   settings_pin: !secret settings_pin  ## PIN required to reveal all hidden pages/settings menu
   master_pin: !secret master_pin  ## PIN required to unlock the front door from the lock screen
   door_alarm_door_name: "STATUS"
@@ -134,7 +135,7 @@ substitutions:
   cctv_snapshot_url: "http://ash:466911Zoey@192.168.8.246:8080/photoaf.jpg"  ## ← IP Webcam URL
 
   # ── Home Screen Weather (background wash + condition icon + temperature) ──
-  weather_entity: weather.home  ## ← change to your HA weather entity id
+  weather_entity: weather.forecast_home  ## ← change to your HA weather entity id
   weather_temp_unit: "°F"  ## ← suffix shown after the temperature; use °C if your weather entity reports Celsius
 
   # ── Timezone (used only by the SNTP fallback clock — see time: below) ─────
@@ -452,21 +453,18 @@ api:
             uint32_t offline_ms = millis() - id(disconnect_since_ms);
             return offline_ms >= 120000;
         then:
-          # Give HA a moment to push the real front door state before we
-          # trust it. Right after (re)connect — especially if this
-          # reconnect is happening because HA itself just rebooted — the
-          # lock entity can briefly report "unavailable"/"unknown" instead
-          # of its real state. front_door_known_state (updated below in
-          # the front_door_item on_value handler) only ever holds the last
-          # CONFIRMED locked/unlocked value, so a short wait here lets a
-          # fresh confirmed value replace any stale one from before the
-          # outage before we decide whether to show the popup.
+          # Give HA a moment to push the real door state before we trust
+          # it. Right after (re)connect — especially if this reconnect is
+          # happening because HA itself just rebooted — entities can
+          # briefly report "unavailable"/"unknown" instead of their real
+          # state, so a short wait here lets a fresh confirmed value
+          # replace any stale one from before the outage before we decide
+          # whether to show the popup.
           - delay: 4s
           - if:
               condition:
                 lambda: |-
-                  return id(front_door_known_state) == "locked"
-                      && !id(door_alarm_door_item).state;
+                  return !id(front_door_lock_door_item).state;
               then:
                 - lvgl.page.show: idle_page
                 - lvgl.widget.show: reconnect_unlock_popup
@@ -1188,8 +1186,9 @@ globals:
     # Last CONFIRMED "locked"/"unlocked"/"open"/etc. value from HA for
     # front_door_item. Unlike front_door_item.state itself, this never
     # gets clobbered by a transient "unavailable"/"unknown" report (e.g.
-    # right as the ESP reconnects to HA, or while HA is rebooting), so
-    # it's what the Welcome Home popup check should trust.
+    # right as the ESP reconnects to HA, or while HA is rebooting). Drives
+    # the front door lock screen icon/label only — the Welcome Home popup
+    # check instead trusts front_door_lock_door_item (see api: on_client_connected).
   - id: weather_known_condition
     type: std::string
     restore_value: false
@@ -1948,8 +1947,9 @@ lvgl:
                   text_color: red
                   text: "No HA Connection"
         # ── Reconnect popup: shown when HA reconnects after 2+ min offline and
-        # the front door is Unlocked + Open. Sits above page_content so it
-        # covers the whole screen regardless of what was showing before. ──
+        # front_door_lock_door_item (the lock's own door open/closed sensor)
+        # reads Closed. Sits above page_content so it covers the whole
+        # screen regardless of what was showing before. ──
         - obj:
             id: reconnect_unlock_popup
             hidden: true
@@ -3526,6 +3526,15 @@ binary_sensor:
                   id: ico_home_door_alarm
                   text_color: green
                   text: "\U000F081B"
+
+  # Front door lock's own door-position sensor (open/closed). Used only to
+  # drive the Welcome Home reconnect popup below — separate from
+  # door_alarm_door_item above, which still feeds the home screen STATUS
+  # widget. x == true is "open" (same convention as door_alarm_door_item).
+  - platform: homeassistant
+    id: front_door_lock_door_item
+    entity_id: ${front_door_lock_door_entity}
+    internal: true
 
   # side physical button
   - platform: gpio
