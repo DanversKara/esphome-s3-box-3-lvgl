@@ -117,7 +117,6 @@ substitutions:
   # ── Front Door Lock Screen ────────────────────────────────────────────────
   front_door_name: ""
   front_door_entity: lock.front_door_lock  ## ← change to your front door lock entity id
-  front_door_lock_door_entity: binary_sensor.front_door_lock_door  ## ← door open/closed sensor built into the lock; drives the Welcome Home reconnect popup
   settings_pin: !secret settings_pin  ## PIN required to reveal all hidden pages/settings menu
   master_pin: !secret master_pin  ## PIN required to unlock the front door from the lock screen
   door_alarm_door_name: "STATUS"
@@ -449,24 +448,21 @@ api:
     - if:
         condition:
           lambda: |-
-            if (id(disconnect_since_ms) == 0) return false;
-            uint32_t offline_ms = millis() - id(disconnect_since_ms);
-            return offline_ms >= 120000;
+            return id(disconnect_since_ms) != 0;
         then:
-          # Give HA a moment to push the real door state before we trust
-          # it. Right after (re)connect — especially if this reconnect is
-          # happening because HA itself just rebooted — entities can
-          # briefly report "unavailable"/"unknown" instead of their real
-          # state, so a short wait here lets a fresh confirmed value
-          # replace any stale one from before the outage before we decide
-          # whether to show the popup.
-          - delay: 4s
+          # Popup now lives in lvgl: top_layer, so it overlays whatever
+          # screen is currently showing — no page switch needed. Only
+          # exception: don't interrupt someone who's mid-entry on the
+          # settings PIN keypad (alarm_keypad_page with alarm_action ==
+          # "settings_unlock"). The front-door-unlock keypad isn't
+          # excluded — the popup can show over that one.
           - if:
               condition:
-                lambda: |-
-                  return !id(front_door_lock_door_item).state;
+                not:
+                  and:
+                    - lvgl.page.is_showing: alarm_keypad_page
+                    - lambda: 'return id(alarm_action) == "settings_unlock";'
               then:
-                - lvgl.page.show: idle_page
                 - lvgl.widget.show: reconnect_unlock_popup
     - lambda: id(disconnect_since_ms) = 0;
   on_client_disconnected:
@@ -1187,8 +1183,7 @@ globals:
     # front_door_item. Unlike front_door_item.state itself, this never
     # gets clobbered by a transient "unavailable"/"unknown" report (e.g.
     # right as the ESP reconnects to HA, or while HA is rebooting). Drives
-    # the front door lock screen icon/label only — the Welcome Home popup
-    # check instead trusts front_door_lock_door_item (see api: on_client_connected).
+    # the front door lock screen icon/label only.
   - id: weather_known_condition
     type: std::string
     restore_value: false
@@ -1669,6 +1664,98 @@ lvgl:
   id: lvgl_display
   bottom_layer:
     bg_color: 0x000000
+  top_layer:
+    widgets:
+      # ── Reconnect popup: shown whenever the API reconnects after any
+      # disconnect (i.e. the No HA Connection indicator goes back to
+      # Connected). Lives in top_layer so it overlays whatever screen is
+      # currently showing, except the settings PIN keypad (see api:
+      # on_client_connected). ──
+      - obj:
+          id: reconnect_unlock_popup
+          hidden: true
+          align: CENTER
+          width: 100%
+          height: 100%
+          radius: 0
+          bg_color: 0x000000
+          bg_opa: 85%
+          border_opa: TRANSP
+          pad_all: 0
+          widgets:
+            - obj:
+                align: CENTER
+                width: 260
+                height: 150
+                bg_color: 0x1a1a1a
+                bg_opa: COVER
+                border_color: 0x444444
+                border_width: 1
+                radius: 8
+                pad_all: 10
+                layout:
+                  type: FLEX
+                  flex_flow: COLUMN
+                  flex_align_main: CENTER
+                  flex_align_cross: CENTER
+                  pad_row: 10
+                widgets:
+                  - label:
+                      text: "Welcome Home"
+                      text_align: CENTER
+                      text_color: 0xFFFFFF
+                      text_font: my_font16
+                      long_mode: WRAP
+                      width: 100%
+                  - label:
+                      text: "Unlock Front Door?"
+                      text_align: CENTER
+                      text_color: amber
+                      text_font: my_font16
+                      long_mode: WRAP
+                      width: 100%
+                  - obj:
+                      width: 100%
+                      height: 40
+                      bg_opa: TRANSP
+                      border_opa: TRANSP
+                      pad_all: 0
+                      layout:
+                        type: FLEX
+                        flex_flow: ROW
+                        flex_align_main: SPACE_EVENLY
+                        flex_align_cross: CENTER
+                      widgets:
+                        - button:
+                            width: 100
+                            height: 36
+                            styles: button_style
+                            pressed:
+                              styles: button_pressed_style
+                            widgets:
+                              - label:
+                                  align: CENTER
+                                  text: "No"
+                                  text_color: 0xFFFFFF
+                            on_release:
+                              - lvgl.widget.hide: reconnect_unlock_popup
+                        - button:
+                            width: 100
+                            height: 36
+                            bg_color: 0x330000
+                            bg_grad_color: 0x1a0000
+                            widgets:
+                              - label:
+                                  align: CENTER
+                                  text: "Yes"
+                                  text_color: red
+                            on_release:
+                              - homeassistant.action:
+                                  action: lock.unlock
+                                  data:
+                                    entity_id: ${front_door_entity}
+                              - lvgl.widget.hide: reconnect_unlock_popup
+
   buffer_size: 100%
   byte_order: ${lvgl_byte_order}
   pages:
@@ -1946,95 +2033,6 @@ lvgl:
                   text_font: my_font16
                   text_color: red
                   text: "No HA Connection"
-        # ── Reconnect popup: shown when HA reconnects after 2+ min offline and
-        # front_door_lock_door_item (the lock's own door open/closed sensor)
-        # reads Closed. Sits above page_content so it covers the whole
-        # screen regardless of what was showing before. ──
-        - obj:
-            id: reconnect_unlock_popup
-            hidden: true
-            align: CENTER
-            width: 100%
-            height: 100%
-            radius: 0
-            bg_color: 0x000000
-            bg_opa: 85%
-            border_opa: TRANSP
-            pad_all: 0
-            widgets:
-              - obj:
-                  align: CENTER
-                  width: 260
-                  height: 150
-                  bg_color: 0x1a1a1a
-                  bg_opa: COVER
-                  border_color: 0x444444
-                  border_width: 1
-                  radius: 8
-                  pad_all: 10
-                  layout:
-                    type: FLEX
-                    flex_flow: COLUMN
-                    flex_align_main: CENTER
-                    flex_align_cross: CENTER
-                    pad_row: 10
-                  widgets:
-                    - label:
-                        text: "Welcome Home"
-                        text_align: CENTER
-                        text_color: 0xFFFFFF
-                        text_font: my_font16
-                        long_mode: WRAP
-                        width: 100%
-                    - label:
-                        text: "Unlock Front Door?"
-                        text_align: CENTER
-                        text_color: amber
-                        text_font: my_font16
-                        long_mode: WRAP
-                        width: 100%
-                    - obj:
-                        width: 100%
-                        height: 40
-                        bg_opa: TRANSP
-                        border_opa: TRANSP
-                        pad_all: 0
-                        layout:
-                          type: FLEX
-                          flex_flow: ROW
-                          flex_align_main: SPACE_EVENLY
-                          flex_align_cross: CENTER
-                        widgets:
-                          - button:
-                              width: 100
-                              height: 36
-                              styles: button_style
-                              pressed:
-                                styles: button_pressed_style
-                              widgets:
-                                - label:
-                                    align: CENTER
-                                    text: "No"
-                                    text_color: 0xFFFFFF
-                              on_release:
-                                - lvgl.widget.hide: reconnect_unlock_popup
-                          - button:
-                              width: 100
-                              height: 36
-                              bg_color: 0x330000
-                              bg_grad_color: 0x1a0000
-                              widgets:
-                                - label:
-                                    align: CENTER
-                                    text: "Yes"
-                                    text_color: red
-                              on_release:
-                                - homeassistant.action:
-                                    action: lock.unlock
-                                    data:
-                                      entity_id: ${front_door_entity}
-                                - lvgl.widget.hide: reconnect_unlock_popup
-
     - id: alarm_keypad_page
       skip: true
       widgets:
@@ -3526,15 +3524,6 @@ binary_sensor:
                   id: ico_home_door_alarm
                   text_color: green
                   text: "\U000F081B"
-
-  # Front door lock's own door-position sensor (open/closed). Used only to
-  # drive the Welcome Home reconnect popup below — separate from
-  # door_alarm_door_item above, which still feeds the home screen STATUS
-  # widget. x == true is "open" (same convention as door_alarm_door_item).
-  - platform: homeassistant
-    id: front_door_lock_door_item
-    entity_id: ${front_door_lock_door_entity}
-    internal: true
 
   # side physical button
   - platform: gpio
