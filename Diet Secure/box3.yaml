@@ -448,7 +448,7 @@ api:
     - if:
         condition:
           lambda: |-
-            return id(disconnect_since_ms) != 0;
+            return id(had_api_connection);
         then:
           # Popup now lives in lvgl: top_layer, so it overlays whatever
           # screen is currently showing — no page switch needed. Only
@@ -456,6 +456,16 @@ api:
           # settings PIN keypad (alarm_keypad_page with alarm_action ==
           # "settings_unlock"). The front-door-unlock keypad isn't
           # excluded — the popup can show over that one.
+          #
+          # Triggered off had_api_connection (has the API connected at
+          # least once since the ESP booted) rather than disconnect_since_ms
+          # (a timestamp set only if on_client_disconnected or the 2s poll
+          # actually caught the outage). That detection can miss fast/soft
+          # drops — a graceful HA restart or a brief WiFi roam — so the
+          # popup silently failed to appear even though this was a real
+          # reconnect. had_api_connection only needs "was there ever a
+          # prior connection", which on_client_connected firing again
+          # already guarantees.
           - if:
               condition:
                 not:
@@ -464,7 +474,9 @@ api:
                     - lambda: 'return id(alarm_action) == "settings_unlock";'
               then:
                 - lvgl.widget.show: reconnect_unlock_popup
-    - lambda: id(disconnect_since_ms) = 0;
+    - lambda: |-
+        id(had_api_connection) = true;
+        id(disconnect_since_ms) = 0;
   on_client_disconnected:
     - lambda: |-
         id(api_fail_count) = 0;
@@ -1175,6 +1187,18 @@ globals:
     type: uint32_t
     restore_value: false
     initial_value: "0"
+  - id: had_api_connection
+    type: bool
+    restore_value: false
+    initial_value: "false"
+    # True once the API has connected at least once since the ESP itself
+    # booted. Used (instead of disconnect_since_ms) to decide whether an
+    # on_client_connected event is a genuine reconnect worth popping up
+    # "Welcome Home" for, vs. the very first connect after an ESP reboot.
+    # Unlike disconnect_since_ms, this doesn't depend on reliably catching
+    # the moment of disconnection (on_client_disconnected can fail to fire
+    # promptly on a graceful HA restart or a soft/roaming WiFi drop) — it
+    # only needs to know a connection happened before, which is certain.
   - id: front_door_known_state
     type: std::string
     restore_value: false
