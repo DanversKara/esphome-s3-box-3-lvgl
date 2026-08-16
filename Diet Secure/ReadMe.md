@@ -1,1 +1,9 @@
-this copy is a strip down copy that is very basic and kinda starting over from the OG work to give me what i want only, no Ai Voice, i this device sucks to use it and waste of memory, space and network, might as well use my google tv and remove unused code to use for something i do use. i removed a lot of unused code, this Diet Secure will be my start point for only things i want
+## Screenshots
+
+| Feature | Screenshot |
+|---------|------------|
+| Welcome / Unlock | ![Welcome Unlock](https://raw.githubusercontent.com/DanversKara/esphome-s3-box-3-lvgl/main/Diet%20Secure/images/readme_images/Welcome_Unlock.jpg) |
+| Home Screen | ![Home](https://raw.githubusercontent.com/DanversKara/esphome-s3-box-3-lvgl/main/Diet%20Secure/images/readme_images/Home.jpg) |
+| Lights Color Control | ![Lights Color](https://raw.githubusercontent.com/DanversKara/esphome-s3-box-3-lvgl/main/Diet%20Secure/images/readme_images/Lights_color.jpg) |
+| Front Door Lock/Unlock | ![Front Door Lock/Unlock](https://raw.githubusercontent.com/DanversKara/esphome-s3-box-3-lvgl/main/Diet%20Secure/images/readme_images/Front_Door_Lock_Unlock_button.jpg) |
+| Settings PIN | ![Settings PIN](https://raw.githubusercontent.com/DanversKara/esphome-s3-box-3-lvgl/main/Diet%20Secure/images/readme_images/Settings_Pin.jpg) |
