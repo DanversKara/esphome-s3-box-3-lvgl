@@ -503,7 +503,15 @@ interval:
                     - lambda: return id(api_fail_count) >= 3;
                     - lambda: return !id(init_in_progress);
                 then:
-                  - lambda: id(api_connection) = false;
+                  - lambda: |-
+                      if (id(api_connection)) {
+                        // Transitioning connected -> disconnected right now.
+                        // on_client_disconnected doesn't always fire promptly
+                        // (that's the whole reason this poll exists), so this
+                        // is the reliable place to timestamp the outage.
+                        id(disconnect_since_ms) = millis();
+                      }
+                      id(api_connection) = false;
                   - script.execute: draw_display
       - if:
           condition:
@@ -1717,10 +1725,6 @@ lvgl:
                               text_font: icon_font_30
                               text_color: 0xCCCCCC
                               text: "\U000F033F"
-                          - label:
-                              text_font: my_font16
-                              text_color: 0xCCCCCC
-                              text: "STATUS:"
                           - label:
                               id: ico_home_door_alarm
                               text_font: icon_font_30
