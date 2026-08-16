@@ -133,6 +133,13 @@ substitutions:
   cctv_camera_entity: camera.frontdoor  ## ← change to your HA camera entity id
   cctv_snapshot_url: "http://ash:466911Zoey@192.168.8.246:8080/photoaf.jpg"  ## ← IP Webcam URL
 
+  # ── Home Screen Weather (background wash + condition icon + temperature) ──
+  weather_entity: weather.home  ## ← change to your HA weather entity id
+  weather_temp_unit: "°F"  ## ← suffix shown after the temperature; use °C if your weather entity reports Celsius
+
+  # ── Timezone (used only by the SNTP fallback clock — see time: below) ─────
+  timezone: "America/Los_Angeles"  ## ← change to your local IANA timezone
+
   # ── Page 2 (second swipe page) ────────────────────────────────────────────
   page2_title: "More"  ## ← title for second icon page
 
@@ -443,12 +450,26 @@ api:
           lambda: |-
             if (id(disconnect_since_ms) == 0) return false;
             uint32_t offline_ms = millis() - id(disconnect_since_ms);
-            return offline_ms >= 120000
-                && id(front_door_item).state == "locked"
-                && !id(door_alarm_door_item).state;
+            return offline_ms >= 120000;
         then:
-          - lvgl.page.show: idle_page
-          - lvgl.widget.show: reconnect_unlock_popup
+          # Give HA a moment to push the real front door state before we
+          # trust it. Right after (re)connect — especially if this
+          # reconnect is happening because HA itself just rebooted — the
+          # lock entity can briefly report "unavailable"/"unknown" instead
+          # of its real state. front_door_known_state (updated below in
+          # the front_door_item on_value handler) only ever holds the last
+          # CONFIRMED locked/unlocked value, so a short wait here lets a
+          # fresh confirmed value replace any stale one from before the
+          # outage before we decide whether to show the popup.
+          - delay: 4s
+          - if:
+              condition:
+                lambda: |-
+                  return id(front_door_known_state) == "locked"
+                      && !id(door_alarm_door_item).state;
+              then:
+                - lvgl.page.show: idle_page
+                - lvgl.widget.show: reconnect_unlock_popup
     - lambda: id(disconnect_since_ms) = 0;
   on_client_disconnected:
     - lambda: |-
@@ -478,6 +499,20 @@ time:
         seconds: 0
         then:
           - script.execute: time_update
+  # Fallback clock source: syncs over plain WiFi/internet (NTP) so the
+  # clock still comes up if HA is unreachable/rebooting when the ESP
+  # boots. ha_time (above) is still preferred whenever it's synced,
+  # since it also carries HA's configured timezone. time_update below
+  # falls back to this only when ha_time hasn't synced yet.
+  # Note: this can't help on a true cold boot with zero network at all —
+  # the S3 Box 3 has no battery-backed RTC, so with neither HA, WiFi, nor
+  # internet ever reached since power-on there is genuinely no way for
+  # the device to know the real time.
+  - platform: sntp
+    id: sntp_time
+    timezone: ${timezone}
+    on_time_sync:
+      - script.execute: time_update
 
 interval:
   - interval: 2s #requires WIFI - fast disconnect detection only
@@ -696,6 +731,29 @@ sensor:
                   id: slider_color_temp
                   value: !lambda return (int)x;
 
+### HOME SCREEN WEATHER TEMPERATURE (reads the "temperature" attribute of weather_entity) ###
+  - platform: homeassistant
+    id: weather_temp_item
+    entity_id: ${weather_entity}
+    attribute: temperature
+    internal: true
+    on_value:
+      then:
+        - if:
+            # A NAN reading means the attribute was unavailable/missing
+            # (e.g. HA rebooting) — ignore it and keep showing the last
+            # good temperature instead of blanking the label.
+            condition:
+              lambda: return !std::isnan(x);
+            then:
+              - lvgl.label.update:
+                  id: lbl_home_weather_temp
+                  text: !lambda |-
+                    char buf[16];
+                    sprintf(buf, "%.0f%s", x, "${weather_temp_unit}");
+                    return std::string(buf);
+              - lvgl.widget.show: lbl_home_weather_temp
+
 
 speaker:
   - id: i2s_audio_speaker
@@ -806,7 +864,12 @@ script:
           text: !lambda |-
             static const char* days[] {"${sun}","${mon}","${tue}","${wed}","${thur}","${fri}","${sat}"};
             static const char* months[] {"${january}","${february}","${march}","${april}","${may}","${june}","${july}","${august}","${september}","${october}","${november}","${december}"};
+            // Prefer HA's clock (it carries HA's configured timezone);
+            // fall back to SNTP if HA hasn't synced yet (e.g. HA is
+            // still rebooting) so the date isn't blank on a fresh boot.
             auto t = id(ha_time).now();
+            if (!t.is_valid()) t = id(sntp_time).now();
+            if (!t.is_valid()) return std::string("");
             char buffer[50];
             sprintf(buffer, "%s %s %d",days[t.day_of_week - 1],months[t.month - 1],t.day_of_month);
             return std::string(buffer);
@@ -818,13 +881,19 @@ script:
                 id: home_clock_label
                 text: 
                   time_format: "%H:%M"
-                  time: !lambda return id(ha_time).now();
+                  time: !lambda |-
+                    auto t = id(ha_time).now();
+                    if (!t.is_valid()) t = id(sntp_time).now();
+                    return t;
           else:
             - lvgl.label.update:
                 id: home_clock_label
                 text: 
                   time_format: "%l:%M %p"
-                  time: !lambda return id(ha_time).now();
+                  time: !lambda |-
+                    auto t = id(ha_time).now();
+                    if (!t.is_valid()) t = id(sntp_time).now();
+                    return t;
       - if:
           condition:
             and:
@@ -1112,6 +1181,19 @@ globals:
     type: uint32_t
     restore_value: false
     initial_value: "0"
+  - id: front_door_known_state
+    type: std::string
+    restore_value: false
+    initial_value: '""'
+    # Last CONFIRMED "locked"/"unlocked"/"open"/etc. value from HA for
+    # front_door_item. Unlike front_door_item.state itself, this never
+    # gets clobbered by a transient "unavailable"/"unknown" report (e.g.
+    # right as the ESP reconnects to HA, or while HA is rebooting), so
+    # it's what the Welcome Home popup check should trust.
+  - id: weather_known_condition
+    type: std::string
+    restore_value: false
+    initial_value: '""'
   - id: ble_scanning
     type: bool
     restore_value: false
@@ -1364,48 +1446,132 @@ text_sensor:
     on_value:
       then:
         - if:
+            # HA can briefly report "unavailable"/"unknown" for this
+            # entity right as the ESP (re)connects to the API, or while
+            # HA itself is restarting. That used to get read as "not
+            # locked" and flash the lock screen/homepage icon red (and
+            # fool the Welcome Home popup check) even though the door
+            # was never actually unlocked. Only trust — and remember —
+            # an actual state report; ignore anything else and leave the
+            # display showing whatever was last confirmed.
             condition:
-              lambda: return (id(front_door_item).state == "locked");
+              lambda: |-
+                std::string s = id(front_door_item).state;
+                return s == "locked" || s == "unlocked" || s == "open"
+                    || s == "locking" || s == "unlocking" || s == "jammed";
             then:
+              - lambda: id(front_door_known_state) = id(front_door_item).state;
+              - if:
+                  condition:
+                    lambda: return id(front_door_known_state) == "locked";
+                  then:
+                    - lvgl.label.update:
+                        id: ico_front_door_lock
+                        text_color: lime
+                        text: "\U000F033E"
+                    - lvgl.label.update:
+                        id: lbl_front_door_status
+                        text_color: lime
+                        text: "LOCKED"
+                    - lvgl.label.update:
+                        id: lbl_front_door_action
+                        text: "Tap to Unlock"
+                    - lvgl.widget.update:
+                        id: but_front_door_lock
+                        bg_color: 0x001a00
+                        bg_grad_color: 0x003300
+                    - lvgl.label.update:
+                        id: ico_home_door_status
+                        text_color: lime
+                        text: "\U000F033E"
+                  else:
+                    - lvgl.label.update:
+                        id: ico_front_door_lock
+                        text_color: red
+                        text: "\U000F033F"
+                    - lvgl.label.update:
+                        id: lbl_front_door_status
+                        text_color: red
+                        text: "UNLOCKED"
+                    - lvgl.label.update:
+                        id: lbl_front_door_action
+                        text: "Tap to Lock"
+                    - lvgl.widget.update:
+                        id: but_front_door_lock
+                        bg_color: 0x330000
+                        bg_grad_color: 0x1a0000
+                    - lvgl.label.update:
+                        id: ico_home_door_status
+                        text_color: red
+                        text: "\U000F033F"
+
+### HOME SCREEN WEATHER CONDITION SENSOR ###
+  - platform: homeassistant
+    id: weather_condition_item
+    entity_id: ${weather_entity}
+    internal: true
+    on_value:
+      then:
+        - if:
+            # Same defensive pattern as the front door sensor above:
+            # ignore "unavailable"/"unknown"/empty blips from HA and
+            # just keep showing the last confirmed condition, rather
+            # than blanking the weather background/icon every time HA
+            # restarts or briefly drops the connection.
+            condition:
+              lambda: |-
+                std::string s = id(weather_condition_item).state;
+                return !s.empty() && s != "unavailable" && s != "unknown";
+            then:
+              - lambda: id(weather_known_condition) = id(weather_condition_item).state;
               - lvgl.label.update:
-                  id: ico_front_door_lock
-                  text_color: lime
-                  text: "\U000F033E"
-              - lvgl.label.update:
-                  id: lbl_front_door_status
-                  text_color: lime
-                  text: "LOCKED"
-              - lvgl.label.update:
-                  id: lbl_front_door_action
-                  text: "Tap to Unlock"
+                  id: ico_home_weather
+                  text: !lambda |-
+                    std::string c = id(weather_known_condition);
+                    if (c == "sunny") return "\U000F0599";
+                    if (c == "clear-night") return "\U000F0594";
+                    if (c == "cloudy") return "\U000F0590";
+                    if (c == "partlycloudy") return "\U000F0595";
+                    if (c == "rainy") return "\U000F0597";
+                    if (c == "pouring") return "\U000F0596";
+                    if (c == "lightning") return "\U000F0593";
+                    if (c == "lightning-rainy") return "\U000F067E";
+                    if (c == "snowy") return "\U000F0598";
+                    if (c == "snowy-rainy") return "\U000F067F";
+                    if (c == "fog") return "\U000F0591";
+                    if (c == "hail") return "\U000F0592";
+                    if (c == "windy" || c == "windy-variant") return "\U000F059D";
+                    if (c == "exceptional") return "\U000F0F2F";
+                    return "";
+              - lvgl.widget.show: ico_home_weather
               - lvgl.widget.update:
-                  id: but_front_door_lock
-                  bg_color: 0x001a00
-                  bg_grad_color: 0x003300
-              - lvgl.label.update:
-                  id: ico_home_door_status
-                  text_color: lime
-                  text: "\U000F033E"
-            else:
-              - lvgl.label.update:
-                  id: ico_front_door_lock
-                  text_color: red
-                  text: "\U000F033F"
-              - lvgl.label.update:
-                  id: lbl_front_door_status
-                  text_color: red
-                  text: "UNLOCKED"
-              - lvgl.label.update:
-                  id: lbl_front_door_action
-                  text: "Tap to Lock"
-              - lvgl.widget.update:
-                  id: but_front_door_lock
-                  bg_color: 0x330000
-                  bg_grad_color: 0x1a0000
-              - lvgl.label.update:
-                  id: ico_home_door_status
-                  text_color: red
-                  text: "\U000F033F"
+                  id: weather_bg
+                  bg_color: !lambda |-
+                    std::string c = id(weather_known_condition);
+                    if (c == "sunny") return lv_color_hex(0x0d3b66);
+                    if (c == "clear-night") return lv_color_hex(0x05051a);
+                    if (c == "cloudy") return lv_color_hex(0x2b2b30);
+                    if (c == "partlycloudy") return lv_color_hex(0x0f2942);
+                    if (c == "rainy") return lv_color_hex(0x0d1f33);
+                    if (c == "pouring") return lv_color_hex(0x081420);
+                    if (c == "lightning" || c == "lightning-rainy") return lv_color_hex(0x14101f);
+                    if (c == "snowy" || c == "snowy-rainy") return lv_color_hex(0x1a2733);
+                    if (c == "fog" || c == "hail") return lv_color_hex(0x333333);
+                    if (c == "windy" || c == "windy-variant") return lv_color_hex(0x1f2e26);
+                    return lv_color_hex(0x000000);
+                  bg_grad_color: !lambda |-
+                    std::string c = id(weather_known_condition);
+                    if (c == "sunny") return lv_color_hex(0xd98e04);
+                    if (c == "clear-night") return lv_color_hex(0x1a1a4d);
+                    if (c == "cloudy") return lv_color_hex(0x4d4d55);
+                    if (c == "partlycloudy") return lv_color_hex(0x36536b);
+                    if (c == "rainy") return lv_color_hex(0x1a3a5c);
+                    if (c == "pouring") return lv_color_hex(0x11283d);
+                    if (c == "lightning" || c == "lightning-rainy") return lv_color_hex(0x2b2140);
+                    if (c == "snowy" || c == "snowy-rainy") return lv_color_hex(0x3d5266);
+                    if (c == "fog" || c == "hail") return lv_color_hex(0x555555);
+                    if (c == "windy" || c == "windy-variant") return lv_color_hex(0x37503f);
+                    return lv_color_hex(0x000000);
 
 color:
   - id: active_timer_color
@@ -1596,6 +1762,23 @@ lvgl:
         - obj:
             styles: page_content
             widgets:
+              # ── Weather background wash — sits behind everything else on
+              # this page; updated by weather_condition_item's on_value
+              # handler. Starts black/transparent-looking (matches
+              # page_content's own bg) until the first weather report
+              # arrives, so there's no odd flash on a fresh boot. ──
+              - obj:
+                  id: weather_bg
+                  align: TOP_MID
+                  width: 100%
+                  height: 100%
+                  radius: 0
+                  bg_opa: COVER
+                  bg_grad_dir: VER
+                  bg_color: 0x000000
+                  bg_grad_color: 0x000000
+                  border_opa: TRANSP
+                  pad_all: 0
               - obj:
                   align: TOP_MID
                   styles: header_footer
@@ -1730,6 +1913,18 @@ lvgl:
                               text_font: icon_font_30
                               text_color: 0xCCCCCC
                               text: "\U000F081B"
+                          - label:
+                              id: ico_home_weather
+                              hidden: true
+                              text_font: icon_font_30
+                              text_color: 0xFFFFFF
+                              text: " "
+                          - label:
+                              id: lbl_home_weather_temp
+                              hidden: true
+                              text_font: my_font16
+                              text_color: 0xFFFFFF
+                              text: " "
                           - label:
                               id: ico_home_battery
                               hidden: true
