@@ -759,27 +759,6 @@ sensor:
                     sprintf(buf, "%.0f%s", x, "${weather_temp_unit}");
                     return std::string(buf);
               - lvgl.widget.show: lbl_home_weather_temp
-              # ── Sky-gradient background wash, tinted by outdoor temp
-              # instead of weather condition. Keeps the same "blue top,
-              # warm bottom" horizon look you liked from the old sunny
-              # condition color — it just shifts cooler (icy blue) when
-              # cold and warmer (deep orange/red) when hot, rather than
-              # switching on condition. Assumes ${weather_temp_unit} is
-              # °F — adjust the thresholds below if you switch to °C. ──
-              - lvgl.widget.update:
-                  id: weather_bg
-                  bg_color: !lambda |-
-                    if (x < 32)  return lv_color_hex(0x0a1a33); // freezing
-                    if (x < 50)  return lv_color_hex(0x0d2b4d); // cold
-                    if (x < 70)  return lv_color_hex(0x0d3b66); // mild
-                    if (x < 85)  return lv_color_hex(0x1a3a5c); // warm
-                    return lv_color_hex(0x3d1f0a);               // hot
-                  bg_grad_color: !lambda |-
-                    if (x < 32)  return lv_color_hex(0x9fc2d9); // freezing
-                    if (x < 50)  return lv_color_hex(0x6f9bbf); // cold
-                    if (x < 70)  return lv_color_hex(0xd98e04); // mild
-                    if (x < 85)  return lv_color_hex(0xe8720c); // warm
-                    return lv_color_hex(0xb33a0d);               // hot
 
 
 speaker:
@@ -1583,6 +1562,34 @@ text_sensor:
                     if (c == "exceptional") return "\U000F0F2F";
                     return "";
               - lvgl.widget.show: ico_home_weather
+              - lvgl.widget.update:
+                  id: weather_bg
+                  bg_color: !lambda |-
+                    std::string c = id(weather_known_condition);
+                    if (c == "sunny") return lv_color_hex(0x0d3b66);
+                    if (c == "clear-night") return lv_color_hex(0x05051a);
+                    if (c == "cloudy") return lv_color_hex(0x2b2b30);
+                    if (c == "partlycloudy") return lv_color_hex(0x0f2942);
+                    if (c == "rainy") return lv_color_hex(0x0d1f33);
+                    if (c == "pouring") return lv_color_hex(0x081420);
+                    if (c == "lightning" || c == "lightning-rainy") return lv_color_hex(0x14101f);
+                    if (c == "snowy" || c == "snowy-rainy") return lv_color_hex(0x1a2733);
+                    if (c == "fog" || c == "hail") return lv_color_hex(0x333333);
+                    if (c == "windy" || c == "windy-variant") return lv_color_hex(0x1f2e26);
+                    return lv_color_hex(0x000000);
+                  bg_grad_color: !lambda |-
+                    std::string c = id(weather_known_condition);
+                    if (c == "sunny") return lv_color_hex(0xd98e04);
+                    if (c == "clear-night") return lv_color_hex(0x1a1a4d);
+                    if (c == "cloudy") return lv_color_hex(0x4d4d55);
+                    if (c == "partlycloudy") return lv_color_hex(0x36536b);
+                    if (c == "rainy") return lv_color_hex(0x1a3a5c);
+                    if (c == "pouring") return lv_color_hex(0x11283d);
+                    if (c == "lightning" || c == "lightning-rainy") return lv_color_hex(0x2b2140);
+                    if (c == "snowy" || c == "snowy-rainy") return lv_color_hex(0x3d5266);
+                    if (c == "fog" || c == "hail") return lv_color_hex(0x555555);
+                    if (c == "windy" || c == "windy-variant") return lv_color_hex(0x37503f);
+                    return lv_color_hex(0x000000);
 
 color:
   - id: active_timer_color
@@ -1865,12 +1872,11 @@ lvgl:
         - obj:
             styles: page_content
             widgets:
-              # ── Sky-gradient background wash — sits behind everything
-              # else on this page; updated by weather_temp_item's on_value
-              # handler (tinted by outdoor temperature, not condition).
-              # Starts black/transparent-looking (matches page_content's
-              # own bg) until the first temperature report arrives, so
-              # there's no odd flash on a fresh boot. ──
+              # ── Weather background wash — sits behind everything else on
+              # this page; updated by weather_condition_item's on_value
+              # handler. Starts black/transparent-looking (matches
+              # page_content's own bg) until the first weather report
+              # arrives, so there's no odd flash on a fresh boot. ──
               - obj:
                   id: weather_bg
                   align: TOP_MID
