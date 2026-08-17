@@ -397,6 +397,10 @@ wifi:
   ap:
     ssid: ${name}
     password: ${wifi_fallback_pwd}   
+  reboot_timeout: 0s # disable default 15min no-wifi auto-reboot — this device
+                      # is carried out of range on purpose (e.g. to the store),
+                      # and a mid-trip reboot wipes had_api_connection, which
+                      # is why the Welcome Home popup was silently skipped.
   on_connect:
     - lambda: id(wifi_connection) = true;
     - script.execute: draw_display
@@ -439,6 +443,9 @@ esphome:
 api:
   encryption:
     key: ${api_key}
+  reboot_timeout: 0s # same reasoning as wifi.reboot_timeout above — don't
+                      # auto-reboot just because no HA client is connected
+                      # for >15min while this device is out with you.
   on_client_connected:
     - lambda: |-
         id(api_fail_count) = 0;
