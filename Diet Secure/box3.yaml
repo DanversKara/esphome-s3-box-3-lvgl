@@ -95,6 +95,17 @@ substitutions:
   scenes6_entity: media_player.media6
   scenes6_icon_off: "\U000F083B" #icon from icon_glyphs
   scenes6_icon_on: "\U000F0502" #icon from icon_glyphs
+  # ── Home Page Time-of-Day Animated Background ──────────────────────────────
+  sun_entity: sun.sun #Used to detect sunrise/sunset and day/night for the home page background
+
+  # ── Hamburger Menu IR Device Buttons ────────────────────────────────────────
+  menu_fan_name: "Fan"
+  menu_fan_entity: switch.fan #change to your IR fan switch entity_id
+  menu_tv_name: "TV"
+  menu_tv_entity: switch.tv_ir #change to your IR TV switch entity_id
+  menu_soundbar_name: "Soundbar"
+  menu_soundbar_entity: switch.soundbar #change to your IR soundbar switch entity_id
+
   alarm_entity: alarm_control_panel.alarmo #Alarm - tested with Alarmo
   alarm_background_on: 0x001a00 #Set to 0x000000 to disable
   alarm_background_pending: 0x330d00 #Set to 0x000000 to disable
@@ -127,15 +138,6 @@ substitutions:
   # ── Light Widget (Dimmer + Color) ─────────────────────────────────────────
   light_widget_name: "LIV LITE"
   light_widget_entity: light.color_light  ## ← change to your color/dim light entity
-
-  # ── CCTV Camera Page ──────────────────────────────────────────────────────
-  cctv_page_title: ""
-  cctv_camera_entity: camera.frontdoor  ## ← change to your HA camera entity id
-  cctv_snapshot_url: "http://ash:466911Zoey@192.168.8.246:8080/photoaf.jpg"  ## ← IP Webcam URL
-
-  # ── Home Screen Weather (background wash + condition icon + temperature) ──
-  weather_entity: weather.forecast_home  ## ← change to your HA weather entity id
-  weather_temp_unit: "°F"  ## ← suffix shown after the temperature; use °C if your weather entity reports Celsius
 
   # ── Timezone (used only by the SNTP fallback clock — see time: below) ─────
   timezone: "America/Los_Angeles"  ## ← change to your local IANA timezone
@@ -186,7 +188,6 @@ substitutions:
 
 ###### Default Images (replaced with MDI icons — no RAM cost) ######
   # loading_illustration_file: removed — replaced with mdi:file-image icon label
-  # cctv image: removed — replaced with mdi:camera icon label
   
 ######  Audio Files ######
 # FLAC files for on device sounds
@@ -573,6 +574,57 @@ interval:
     then:
       - script.execute: draw_display
 
+  - interval: 200ms #animated time-of-day background - gentle "breathing" glow, home page only
+    then:
+      - if:
+          condition:
+            lvgl.page.is_showing: idle_page
+          then:
+            - lvgl.style.update:
+                id: time_bg_style
+                bg_color: !lambda |-
+                  float t = (sin(millis() / 1000.0f * (2.0f * 3.14159265f / 14.0f)) + 1.0f) / 2.0f;
+                  uint32_t c = id(bg_top_color);
+                  uint8_t r = (c >> 16) & 0xFF, g = (c >> 8) & 0xFF, b = c & 0xFF;
+                  r = (uint8_t) std::min(255.0f, r + (255 - r) * t * 0.18f);
+                  g = (uint8_t) std::min(255.0f, g + (255 - g) * t * 0.18f);
+                  b = (uint8_t) std::min(255.0f, b + (255 - b) * t * 0.18f);
+                  return lv_color_hex(((uint32_t) r << 16) | ((uint32_t) g << 8) | b);
+                bg_grad_color: !lambda |-
+                  float t = (sin(millis() / 1000.0f * (2.0f * 3.14159265f / 14.0f)) + 1.0f) / 2.0f;
+                  uint32_t c = id(bg_bottom_color);
+                  uint8_t r = (c >> 16) & 0xFF, g = (c >> 8) & 0xFF, b = c & 0xFF;
+                  r = (uint8_t) std::min(255.0f, r + (255 - r) * t * 0.18f);
+                  g = (uint8_t) std::min(255.0f, g + (255 - g) * t * 0.18f);
+                  b = (uint8_t) std::min(255.0f, b + (255 - b) * t * 0.18f);
+                  return lv_color_hex(((uint32_t) r << 16) | ((uint32_t) g << 8) | b);
+            - if:
+                condition:
+                  lambda: return id(bg_is_night);
+                then:
+                  - lvgl.widget.update:
+                      id: star1
+                      bg_opa: !lambda 'return (uint8_t) (90 + 130 * ((sin(millis() / 1000.0f * 0.7f) + 1.0f) / 2.0f));'
+                  - lvgl.widget.update:
+                      id: star2
+                      bg_opa: !lambda 'return (uint8_t) (90 + 130 * ((sin(millis() / 1000.0f * 0.9f + 1.3f) + 1.0f) / 2.0f));'
+                  - lvgl.widget.update:
+                      id: star3
+                      bg_opa: !lambda 'return (uint8_t) (90 + 130 * ((sin(millis() / 1000.0f * 0.5f + 2.6f) + 1.0f) / 2.0f));'
+                  - lvgl.widget.update:
+                      id: star4
+                      bg_opa: !lambda 'return (uint8_t) (90 + 130 * ((sin(millis() / 1000.0f * 1.1f + 3.9f) + 1.0f) / 2.0f));'
+                  - lvgl.widget.update:
+                      id: star5
+                      bg_opa: !lambda 'return (uint8_t) (90 + 130 * ((sin(millis() / 1000.0f * 0.6f + 5.2f) + 1.0f) / 2.0f));'
+            # Force a clean full-screen redraw after the style update above.
+            # Without this, LVGL only repaints each child's own invalidated
+            # rectangle - so whenever the clock digits, an icon, or the
+            # gradient change on their own schedules, that one rectangle can
+            # briefly repaint against stale/partial content instead of the
+            # freshly computed gradient, showing as a mismatched colored box.
+            - lvgl.widget.redraw:
+
 button:
   - platform: factory_reset
     id: factory_reset_btn
@@ -605,6 +657,14 @@ light:
                 show_snow: false
 
 sensor:
+  - platform: homeassistant
+    entity_id: ${sun_entity}
+    attribute: elevation
+    id: sun_elevation
+    internal: true
+    on_value:
+      - script.execute: update_background
+
   - platform: adc
     pin: GPIO10
     id: battery_voltage
@@ -744,30 +804,6 @@ sensor:
                   id: slider_color_temp
                   value: !lambda return (int)x;
 
-### HOME SCREEN WEATHER TEMPERATURE (reads the "temperature" attribute of weather_entity) ###
-  - platform: homeassistant
-    id: weather_temp_item
-    entity_id: ${weather_entity}
-    attribute: temperature
-    internal: true
-    on_value:
-      then:
-        - if:
-            # A NAN reading means the attribute was unavailable/missing
-            # (e.g. HA rebooting) — ignore it and keep showing the last
-            # good temperature instead of blanking the label/background.
-            condition:
-              lambda: return !std::isnan(x);
-            then:
-              - lvgl.label.update:
-                  id: lbl_home_weather_temp
-                  text: !lambda |-
-                    char buf[16];
-                    sprintf(buf, "%.0f%s", x, "${weather_temp_unit}");
-                    return std::string(buf);
-              - lvgl.widget.show: lbl_home_weather_temp
-
-
 speaker:
   - id: i2s_audio_speaker
     platform: i2s_audio
@@ -869,6 +905,65 @@ script:
                   - lvgl.widget.hide: lbl_no_ha_connection
                 else:
                   - lvgl.widget.show: lbl_no_ha_connection
+
+  - id: update_background
+    # Maps the sun's elevation/direction to a home page top/bottom gradient
+    # color pair - no weather data involved. Four states: sunrise twilight,
+    # sunset twilight, day, and night. All four are kept dark-mode; the
+    # interval below animates a gentle "breathing" glow around whichever
+    # pair is active so the background never sits perfectly static. Only
+    # time_bg_style is touched, so no other page is affected.
+    then:
+      - lambda: |-
+          std::string rising = id(sun_rising_state).state;
+          bool is_rising = (rising == "True" || rising == "true" || rising == "on");
+          // NAN before HA's first update - the comparisons below are simply
+          // false for NAN, so twilight/night correctly stay false until real data arrives.
+          float elev = id(sun_elevation).state;
+          bool twilight = (elev > -6.0f && elev < 6.0f);
+          bool is_night = (elev <= -6.0f);
+
+          uint32_t top, bottom;
+
+          if (twilight) {
+            if (is_rising) {
+              // Sunrise: dark plum lifting into a muted, dark ember glow
+              top = 0x1F1235; bottom = 0x4A2E1A;
+            } else {
+              // Sunset: dark violet fading into a muted, dark wine glow
+              top = 0x1A1030; bottom = 0x3A1F2E;
+            }
+          } else if (is_night) {
+            // Night: near-black into deep navy
+            top = 0x030308; bottom = 0x0B1330;
+          } else {
+            // Day: subdued dark slate blue - kept dark-mode, never bright
+            top = 0x0D1B2A; bottom = 0x1B3A5C;
+          }
+
+          id(bg_top_color) = top;
+          id(bg_bottom_color) = bottom;
+          id(bg_is_night) = is_night;
+      - lvgl.style.update:
+          id: time_bg_style
+          bg_color: !lambda 'return lv_color_hex(id(bg_top_color));'
+          bg_grad_color: !lambda 'return lv_color_hex(id(bg_bottom_color));'
+      - if:
+          condition:
+            lambda: return id(bg_is_night);
+          then:
+            - lvgl.widget.show: star1
+            - lvgl.widget.show: star2
+            - lvgl.widget.show: star3
+            - lvgl.widget.show: star4
+            - lvgl.widget.show: star5
+          else:
+            - lvgl.widget.hide: star1
+            - lvgl.widget.hide: star2
+            - lvgl.widget.hide: star3
+            - lvgl.widget.hide: star4
+            - lvgl.widget.hide: star5
+    mode: restart
 
   - id: time_update
     then:
@@ -1078,6 +1173,76 @@ script:
                 text: "Already scanning..."
 
 switch:
+  # ── Hamburger Menu IR Device Buttons — mirrors + controls the HA switches
+  # behind your IR blaster (Fan / TV / Soundbar). Tapping the button calls
+  # switch.toggle, which sends switch.turn_on/turn_off to Home Assistant;
+  # the on_turn_on/on_turn_off below keep the button + icon in sync with
+  # whatever actually changed the switch's state (device, automation, etc). ──
+  - platform: homeassistant
+    id: sw_menu_fan
+    entity_id: ${menu_fan_entity}
+    internal: true
+    on_turn_on:
+      - lvgl.widget.update:
+          id: but_menu_fan
+          state:
+            checked: true
+      - lvgl.label.update:
+          id: ico_menu_fan
+          text_color: yellow
+    on_turn_off:
+      - lvgl.widget.update:
+          id: but_menu_fan
+          state:
+            checked: false
+      - lvgl.label.update:
+          id: ico_menu_fan
+          text_color: 0x666666
+
+  - platform: homeassistant
+    id: sw_menu_tv
+    entity_id: ${menu_tv_entity}
+    internal: true
+    on_turn_on:
+      - lvgl.widget.update:
+          id: but_menu_tv
+          state:
+            checked: true
+      - lvgl.label.update:
+          id: ico_menu_tv
+          text_color: yellow
+    on_turn_off:
+      - lvgl.widget.update:
+          id: but_menu_tv
+          state:
+            checked: false
+      - lvgl.label.update:
+          id: ico_menu_tv
+          text_color: 0x666666
+
+  - platform: homeassistant
+    id: sw_menu_soundbar
+    entity_id: ${menu_soundbar_entity}
+    internal: true
+    on_turn_on:
+      - lvgl.widget.update:
+          id: but_menu_soundbar
+          state:
+            checked: true
+      - lvgl.label.update:
+          id: ico_menu_soundbar
+          text: "\U000F057E" # speaker on
+          text_color: yellow
+    on_turn_off:
+      - lvgl.widget.update:
+          id: but_menu_soundbar
+          state:
+            checked: false
+      - lvgl.label.update:
+          id: ico_menu_soundbar
+          text: "\U000F0581" # speaker off
+          text_color: 0x666666
+
   - platform: gpio
     id: speaker_enable
     internal: true
@@ -1215,10 +1380,6 @@ globals:
     # gets clobbered by a transient "unavailable"/"unknown" report (e.g.
     # right as the ESP reconnects to HA, or while HA is rebooting). Drives
     # the front door lock screen icon/label only.
-  - id: weather_known_condition
-    type: std::string
-    restore_value: false
-    initial_value: '""'
   - id: ble_scanning
     type: bool
     restore_value: false
@@ -1232,6 +1393,25 @@ globals:
   - id: current_uimode
     type: char[50]
     initial_value: ""
+  - id: bg_top_color
+    type: uint32_t
+    restore_value: false
+    initial_value: "0x0D1B2A"
+    # Current "sky" (top) color for the home page background gradient,
+    # set by update_background from the sun's elevation/direction. The
+    # animation interval breathes around this color; it doesn't change it.
+  - id: bg_bottom_color
+    type: uint32_t
+    restore_value: false
+    initial_value: "0x1B3A5C"
+    # Current "horizon" (bottom) color for the home page background gradient.
+  - id: bg_is_night
+    type: bool
+    restore_value: false
+    initial_value: "false"
+    # True when the sun is fully below -6° elevation. Drives the clear-night
+    # star twinkle - no cloud-cover data is available without weather, so
+    # stars simply show for the whole night.
 
 font:
   - file: ${font_file}
@@ -1320,6 +1500,8 @@ font:
       - "\U000F051B"#timer
       - "\U000F0521"#toggle on
       - "\U000F0565"#arming
+      - "\U000F0599"# weather-sunny (used as the "reset to daylight white" icon)
+      - "\U000F05A9"# wifi
       - "\U000F057E"#speaker on
       - "\U000F0581"#speaker off
       - "\U000F05CB"#voice
@@ -1379,31 +1561,14 @@ font:
       - "\U000F033E"#lock
       - "\U000F033F"#lock-open
       - "\U000F00DF"#brightness 
-      - "\U000F0594"# clear-night
       - "\U000F0240"# mdi:message-text (speech bubble)
       - "\U000F03B6"# mdi:ear-hearing (listening)
       - "\U000F04E6"# mdi:thought-bubble (thinking)
       - "\U000F029A"# mdi:alert-circle (error)
-      - "\U000F0590"# cloudy
-      - "\U000F0F2F"# exceptional
-      - "\U000F0591"# fog
-      - "\U000F0592"# hail
-      - "\U000F0593"# lightning
-      - "\U000F067E"# lightning-rainy
-      - "\U000F0595"# partlycloudy
-      - "\U000F0596"# pouring
-      - "\U000F0597"# rainy
-      - "\U000F0598"# snowy
-      - "\U000F067F"# snowy-rainy
-      - "\U000F0599"# sunny
-      - "\U000F059D"# windy
-      - "\U000F059E"# windy-variant
-      - "\U000F14E4"# sunny-off
       - "\U000F18F2"# refresh-auto
       - "\U000F0450"# refresh
       - "\U000F1011"# blinds open
       - "\U000F00AC"# blinds closed
-      - "\U000F00A5"# mdi:camera (cctv placeholder)
       - "\U000F021B"# mdi:file-image (online image placeholder)
       - "\U000F1A6B"# roller-shade open
       - "\U000F1A6C"# roller-shade closed
@@ -1435,6 +1600,14 @@ font:
     glyphs: *icon_glyphs
 
 text_sensor:
+### HOME PAGE TIME-OF-DAY BACKGROUND ###
+  - platform: homeassistant
+    id: sun_rising_state
+    entity_id: ${sun_entity}
+    attribute: rising
+    internal: true
+    on_value:
+      - script.execute: update_background
 ### LIGHT WIDGET STATE SENSOR ###
   - platform: homeassistant
     id: light_widget_state
@@ -1529,74 +1702,6 @@ text_sensor:
                         id: ico_home_door_status
                         text_color: red
                         text: "\U000F033F"
-
-### HOME SCREEN WEATHER CONDITION SENSOR ###
-  - platform: homeassistant
-    id: weather_condition_item
-    entity_id: ${weather_entity}
-    internal: true
-    on_value:
-      then:
-        - if:
-            # Same defensive pattern as the front door sensor above:
-            # ignore "unavailable"/"unknown"/empty blips from HA and
-            # just keep showing the last confirmed condition, rather
-            # than blanking the weather background/icon every time HA
-            # restarts or briefly drops the connection.
-            condition:
-              lambda: |-
-                std::string s = id(weather_condition_item).state;
-                return !s.empty() && s != "unavailable" && s != "unknown";
-            then:
-              - lambda: id(weather_known_condition) = id(weather_condition_item).state;
-              - lvgl.label.update:
-                  id: ico_home_weather
-                  text: !lambda |-
-                    std::string c = id(weather_known_condition);
-                    if (c == "sunny") return "\U000F0599";
-                    if (c == "clear-night") return "\U000F0594";
-                    if (c == "cloudy") return "\U000F0590";
-                    if (c == "partlycloudy") return "\U000F0595";
-                    if (c == "rainy") return "\U000F0597";
-                    if (c == "pouring") return "\U000F0596";
-                    if (c == "lightning") return "\U000F0593";
-                    if (c == "lightning-rainy") return "\U000F067E";
-                    if (c == "snowy") return "\U000F0598";
-                    if (c == "snowy-rainy") return "\U000F067F";
-                    if (c == "fog") return "\U000F0591";
-                    if (c == "hail") return "\U000F0592";
-                    if (c == "windy" || c == "windy-variant") return "\U000F059D";
-                    if (c == "exceptional") return "\U000F0F2F";
-                    return "";
-              - lvgl.widget.show: ico_home_weather
-              - lvgl.widget.update:
-                  id: weather_bg
-                  bg_color: !lambda |-
-                    std::string c = id(weather_known_condition);
-                    if (c == "sunny") return lv_color_hex(0x0d3b66);
-                    if (c == "clear-night") return lv_color_hex(0x05051a);
-                    if (c == "cloudy") return lv_color_hex(0x2b2b30);
-                    if (c == "partlycloudy") return lv_color_hex(0x0f2942);
-                    if (c == "rainy") return lv_color_hex(0x0d1f33);
-                    if (c == "pouring") return lv_color_hex(0x081420);
-                    if (c == "lightning" || c == "lightning-rainy") return lv_color_hex(0x14101f);
-                    if (c == "snowy" || c == "snowy-rainy") return lv_color_hex(0x1a2733);
-                    if (c == "fog" || c == "hail") return lv_color_hex(0x333333);
-                    if (c == "windy" || c == "windy-variant") return lv_color_hex(0x1f2e26);
-                    return lv_color_hex(0x000000);
-                  bg_grad_color: !lambda |-
-                    std::string c = id(weather_known_condition);
-                    if (c == "sunny") return lv_color_hex(0xd98e04);
-                    if (c == "clear-night") return lv_color_hex(0x1a1a4d);
-                    if (c == "cloudy") return lv_color_hex(0x4d4d55);
-                    if (c == "partlycloudy") return lv_color_hex(0x36536b);
-                    if (c == "rainy") return lv_color_hex(0x1a3a5c);
-                    if (c == "pouring") return lv_color_hex(0x11283d);
-                    if (c == "lightning" || c == "lightning-rainy") return lv_color_hex(0x2b2140);
-                    if (c == "snowy" || c == "snowy-rainy") return lv_color_hex(0x3d5266);
-                    if (c == "fog" || c == "hail") return lv_color_hex(0x555555);
-                    if (c == "windy" || c == "windy-variant") return lv_color_hex(0x37503f);
-                    return lv_color_hex(0x000000);
 
 color:
   - id: active_timer_color
@@ -1877,25 +1982,75 @@ lvgl:
     - id: idle_page
       widgets:
         - obj:
-            styles: page_content
+            styles: [page_content, time_bg_style]
             widgets:
-              # ── Weather background wash — sits behind everything else on
-              # this page; updated by weather_condition_item's on_value
-              # handler. Starts black/transparent-looking (matches
-              # page_content's own bg) until the first weather report
-              # arrives, so there's no odd flash on a fresh boot. ──
+              # ── Twinkling stars (clear-night only) — hidden by default, shown
+              # and animated by update_background / the breathing interval ──
               - obj:
-                  id: weather_bg
-                  align: TOP_MID
-                  width: 100%
-                  height: 100%
-                  radius: 0
-                  bg_opa: COVER
-                  bg_grad_dir: VER
-                  bg_color: 0x000000
-                  bg_grad_color: 0x000000
+                  id: star1
+                  hidden: true
+                  x: 20
+                  y: 58
+                  width: 4
+                  height: 4
+                  radius: 4
+                  bg_color: 0xFFFFFF
+                  bg_opa: 60%
                   border_opa: TRANSP
-                  pad_all: 0
+                  shadow_opa: TRANSP
+                  scrollbar_mode: 'OFF'
+              - obj:
+                  id: star2
+                  hidden: true
+                  x: 58
+                  y: 72
+                  width: 3
+                  height: 3
+                  radius: 3
+                  bg_color: 0xFFFFFF
+                  bg_opa: 60%
+                  border_opa: TRANSP
+                  shadow_opa: TRANSP
+                  scrollbar_mode: 'OFF'
+              - obj:
+                  id: star3
+                  hidden: true
+                  x: 160
+                  y: 58
+                  width: 3
+                  height: 3
+                  radius: 3
+                  bg_color: 0xFFFFFF
+                  bg_opa: 60%
+                  border_opa: TRANSP
+                  shadow_opa: TRANSP
+                  scrollbar_mode: 'OFF'
+              - obj:
+                  id: star4
+                  hidden: true
+                  x: 262
+                  y: 68
+                  width: 4
+                  height: 4
+                  radius: 4
+                  bg_color: 0xFFFFFF
+                  bg_opa: 60%
+                  border_opa: TRANSP
+                  shadow_opa: TRANSP
+                  scrollbar_mode: 'OFF'
+              - obj:
+                  id: star5
+                  hidden: true
+                  x: 296
+                  y: 56
+                  width: 3
+                  height: 3
+                  radius: 3
+                  bg_color: 0xFFFFFF
+                  bg_opa: 60%
+                  border_opa: TRANSP
+                  shadow_opa: TRANSP
+                  scrollbar_mode: 'OFF'
               - obj:
                   align: TOP_MID
                   styles: header_footer
@@ -2030,18 +2185,6 @@ lvgl:
                               text_font: icon_font_30
                               text_color: 0xCCCCCC
                               text: "\U000F081B"
-                          - label:
-                              id: ico_home_weather
-                              hidden: true
-                              text_font: icon_font_30
-                              text_color: 0xFFFFFF
-                              text: " "
-                          - label:
-                              id: lbl_home_weather_temp
-                              hidden: true
-                              text_font: my_font16
-                              text_color: 0xFFFFFF
-                              text: " "
                           - label:
                               id: ico_home_battery
                               hidden: true
@@ -2710,9 +2853,11 @@ lvgl:
                         on_release:
                           then:
                             - lvgl.page.show: idle_page
-              # ── Future device pages grid: Fan / TV / AirUnit, etc. ──
-              # Wire each button's on_release to lvgl.page.show once those
-              # pages are built, and swap in their real icons/entities.
+              # ── IR device buttons: Fan / TV / Soundbar — each toggles its
+              # HA switch (switch.fan / switch.tv_ir / switch.soundbar by
+              # default, configurable via the menu_*_entity substitutions).
+              # checked/icon color are kept in sync by the switch's
+              # on_turn_on/on_turn_off actions (see switch: section). ──
               - obj:
                   align: CENTER
                   width: 100%
@@ -2728,7 +2873,7 @@ lvgl:
                     grid_rows: [FR(10), FR(40)]
                   widgets:
                     - label:
-                        text: "Fan"
+                        text: '${menu_fan_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -2736,20 +2881,28 @@ lvgl:
                         grid_cell_row_pos: 0
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
-                    - obj:
+                    - button:
+                        id: but_menu_fan
                         styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 1
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
                         widgets:
                           - label:
+                              id: ico_menu_fan
                               align: CENTER
                               text_font: icon_font_55
                               text_color: 0x666666
                               text: "\U000F0210"
+                        on_release:
+                          - switch.toggle: sw_menu_fan
                     - label:
-                        text: "TV"
+                        text: '${menu_tv_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -2757,20 +2910,28 @@ lvgl:
                         grid_cell_row_pos: 0
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
-                    - obj:
+                    - button:
+                        id: but_menu_tv
                         styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 1
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
                         widgets:
                           - label:
+                              id: ico_menu_tv
                               align: CENTER
                               text_font: icon_font_55
                               text_color: 0x666666
                               text: "\U000F07F4"
+                        on_release:
+                          - switch.toggle: sw_menu_tv
                     - label:
-                        text: "AirUnit"
+                        text: '${menu_soundbar_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -2778,18 +2939,26 @@ lvgl:
                         grid_cell_row_pos: 0
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
-                    - obj:
+                    - button:
+                        id: but_menu_soundbar
                         styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
                         grid_cell_column_pos: 2
                         grid_cell_row_pos: 1
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
                         widgets:
                           - label:
+                              id: ico_menu_soundbar
                               align: CENTER
                               text_font: icon_font_55
                               text_color: 0x666666
-                              text: "\U000F0238"
+                              text: "\U000F0581"
+                        on_release:
+                          - switch.toggle: sw_menu_soundbar
 
     - id: settings_hub_page
       skip: true
@@ -3447,6 +3616,21 @@ lvgl:
       shadow_offset_y: 2
       shadow_opa: 40%
       pad_all: 4
+
+    - id: time_bg_style
+      # Live-updated by update_background / the breathing interval -
+      # the values below are just the initial/fallback look. Applied only
+      # on top of idle_page's page_content, so no other page is affected.
+      bg_color: 0x0D1B2A
+      bg_grad_color: 0x1B3A5C
+      bg_grad_dir: VER
+      bg_opa: COVER
+      border_opa: TRANSP
+      radius: 0
+      pad_all: 0
+      pad_row: 0
+      pad_column: 0
+      border_width: 0
 
     - id: header_footer
       bg_color: 0x1d5f96
