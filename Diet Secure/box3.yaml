@@ -271,19 +271,6 @@ esp32_ble_tracker:
     active: true
     interval: 320ms
     window: 30ms
-  on_ble_advertise:
-    - then:
-        - lambda: |-
-            if (!id(ble_scanning)) return;
-            std::string dev_name = x.get_name();
-            if (dev_name.empty()) {
-              char buf[24];
-              snprintf(buf, sizeof(buf), "(Unknown) %s", x.address_str().c_str());
-              dev_name = buf;
-            } else {
-              dev_name += "  " + x.address_str();
-            }
-            id(ble_seen)[x.address_uint64()] = dev_name;
 
 bluetooth_proxy:
   active: true
@@ -417,12 +404,6 @@ esphome:
   friendly_name: ${friendly_name}
   min_version: 2026.4.0
   name_add_mac_suffix: false
-  # esp_wifi_scan.h wraps the ESP-IDF wifi scan API (esp_wifi_scan_start /
-  # esp_wifi_scan_get_ap_records) so the lambda in wifi_do_scan can call it
-  # directly — ESPHome's wifi: component has no built-in "scan" action.
-  # Must sit next to this YAML file.
-  includes:
-    - esp_wifi_scan.h
   on_boot:
     priority: 600
     then:
@@ -1048,130 +1029,6 @@ script:
             - lambda: strncpy(id(current_uimode), id(uimode).current_option().c_str(), 50);
             - lvgl.widget.redraw:
 
-  - id: wifi_do_scan
-    then:
-      - if:
-          condition:
-            lambda: return !id(wifi_scanning);
-          then:
-            - lambda: id(wifi_scanning) = true;
-            - lvgl.label.update:
-                id: lbl_wifi_status
-                text: "Scanning..."
-            - lambda: |-
-                lv_obj_t *list = id(wifi_scan_list);
-                lv_obj_clean(list);
-                wifi_scan_config_t scan_config = {};
-                scan_config.show_hidden = false;
-                scan_config.scan_type = WIFI_SCAN_TYPE_ACTIVE;
-                scan_config.scan_time.active.min = 80;
-                scan_config.scan_time.active.max = 150;
-                esp_err_t err = esp_wifi_scan_start(&scan_config, true);
-                App.feed_wdt();
-                if (err != ESP_OK) {
-                  lv_obj_t *lbl = lv_label_create(list);
-                  lv_label_set_text(lbl, "Scan failed - try again");
-                  lv_obj_set_style_text_color(lbl, lv_color_hex(0xFF6666), 0);
-                } else {
-                  uint16_t ap_count = 0;
-                  esp_wifi_scan_get_ap_num(&ap_count);
-                  if (ap_count == 0) {
-                    lv_obj_t *lbl = lv_label_create(list);
-                    lv_label_set_text(lbl, "No networks found");
-                    lv_obj_set_style_text_color(lbl, lv_color_hex(0xAAAAAA), 0);
-                  } else {
-                    uint16_t number = ap_count > 15 ? 15 : ap_count;
-                    wifi_ap_record_t ap_info[15];
-                    esp_wifi_scan_get_ap_records(&number, ap_info);
-                    for (int i = 0; i < number; i++) {
-                      char buf[56];
-                      const char *name = ap_info[i].ssid[0] ? (const char *) ap_info[i].ssid : "(hidden network)";
-                      snprintf(buf, sizeof(buf), "%s   %d dBm", name, ap_info[i].rssi);
-                      lv_obj_t *lbl = lv_label_create(list);
-                      lv_label_set_text(lbl, buf);
-                      lv_obj_set_width(lbl, lv_pct(100));
-                      lv_obj_set_style_text_color(lbl, lv_color_white(), 0);
-                    }
-                  }
-                }
-                App.feed_wdt();
-            - lvgl.label.update:
-                id: lbl_wifi_status
-                text: "Tap refresh to scan again"
-            - lambda: id(wifi_scanning) = false;
-          else:
-            - lvgl.label.update:
-                id: lbl_wifi_status
-                text: "Already scanning..."
-
-  - id: ble_do_scan
-    then:
-      - if:
-          condition:
-            lambda: return !id(ble_scanning);
-          then:
-            - lambda: |-
-                lv_obj_t *list = id(ble_scan_list);
-                lv_obj_clean(list);
-                id(ble_seen).clear();
-                id(ble_scanning) = true;
-            - lvgl.label.update:
-                id: lbl_ble_status
-                text: "Scanning for 6 seconds..."
-            - delay: 6s
-            - lambda: |-
-                id(ble_scanning) = false;
-                lv_obj_t *list = id(ble_scan_list);
-                if (id(ble_seen).empty()) {
-                  lv_obj_t *lbl = lv_label_create(list);
-                  lv_label_set_text(lbl, "No devices found");
-                  lv_obj_set_style_text_color(lbl, lv_color_hex(0xAAAAAA), 0);
-                } else {
-                  for (auto const &entry : id(ble_seen)) {
-                    std::string label = entry.second;
-                    const char *icon = "\U000F00AF"; // generic bluetooth
-                    std::string lower = label;
-                    for (auto &c : lower) c = tolower(c);
-                    if (lower.find("phone") != std::string::npos ||
-                        lower.find("iphone") != std::string::npos ||
-                        lower.find("galaxy") != std::string::npos) {
-                      icon = "\U000F011C"; // cellphone
-                    } else if (lower.find("headphone") != std::string::npos ||
-                               lower.find("buds") != std::string::npos ||
-                               lower.find("airpods") != std::string::npos ||
-                               lower.find("earbud") != std::string::npos ||
-                               lower.find("beats") != std::string::npos) {
-                      icon = "\U000F02CB"; // headphones
-                    } else if (lower.find("macbook") != std::string::npos ||
-                               lower.find("laptop") != std::string::npos ||
-                               lower.find("pc") != std::string::npos) {
-                      icon = "\U000F0322"; // laptop
-                    }
-                    lv_obj_t *row = lv_obj_create(list);
-                    lv_obj_set_width(row, lv_pct(100));
-                    lv_obj_set_height(row, LV_SIZE_CONTENT);
-                    lv_obj_set_style_bg_opa(row, LV_OPA_TRANSP, 0);
-                    lv_obj_set_style_border_opa(row, LV_OPA_TRANSP, 0);
-                    lv_obj_set_style_pad_all(row, 0, 0);
-                    lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
-                    lv_obj_set_style_pad_column(row, 6, 0);
-                    lv_obj_t *ico = lv_label_create(row);
-                    lv_obj_set_style_text_font(ico, id(iconfont_small), 0);
-                    lv_obj_set_style_text_color(ico, lv_color_white(), 0);
-                    lv_label_set_text(ico, icon);
-                    lv_obj_t *lbl = lv_label_create(row);
-                    lv_obj_set_style_text_color(lbl, lv_color_white(), 0);
-                    lv_label_set_text(lbl, label.c_str());
-                  }
-                }
-            - lvgl.label.update:
-                id: lbl_ble_status
-                text: "Tap refresh to scan again"
-          else:
-            - lvgl.label.update:
-                id: lbl_ble_status
-                text: "Already scanning..."
-
 switch:
   # ── Hamburger Menu IR Device Buttons — mirrors + controls the HA switches
   # behind your IR blaster (Fan / TV / Soundbar). Tapping the button calls
@@ -1351,10 +1208,6 @@ globals:
     type: int
     restore_value: false
     initial_value: '5'
-  - id: wifi_scanning
-    type: bool
-    restore_value: false
-    initial_value: "false"
   - id: disconnect_since_ms
     type: uint32_t
     restore_value: false
@@ -1380,13 +1233,6 @@ globals:
     # gets clobbered by a transient "unavailable"/"unknown" report (e.g.
     # right as the ESP reconnects to HA, or while HA is rebooting). Drives
     # the front door lock screen icon/label only.
-  - id: ble_scanning
-    type: bool
-    restore_value: false
-    initial_value: "false"
-  - id: ble_seen
-    type: std::map<uint64_t, std::string>
-    restore_value: false
   - id: alarm_action
     type: std::string
     initial_value: ""
@@ -1566,7 +1412,6 @@ font:
       - "\U000F04E6"# mdi:thought-bubble (thinking)
       - "\U000F029A"# mdi:alert-circle (error)
       - "\U000F18F2"# refresh-auto
-      - "\U000F0450"# refresh
       - "\U000F1011"# blinds open
       - "\U000F00AC"# blinds closed
       - "\U000F021B"# mdi:file-image (online image placeholder)
@@ -1574,7 +1419,6 @@ font:
       - "\U000F1A6C"# roller-shade closed
       - "\U000F0156"# close (X)
       - "\U000F035C"# menu (hamburger)
-      - "\U000F00AF"# bluetooth
       - "\U000F081B"# door-closed
       - "\U000F081C"# door-open
       - "\U000F02CB"# headphones
@@ -3130,34 +2974,6 @@ lvgl:
                               text: "\U000F033E"
                         on_release:
                           - lvgl.page.show: lock_set_page
-                    - label:
-                        text: "Bluetooth"
-                        align: CENTER
-                        text_align: CENTER
-                        text_color: 0xFFFFFF
-                        grid_cell_column_pos: 2
-                        grid_cell_row_pos: 2
-                        grid_cell_x_align: STRETCH
-                        grid_cell_y_align: STRETCH
-                    - button:
-                        id: but_settings_7
-                        styles: button_style
-                        pressed:
-                          styles: button_pressed_style
-                        checked:
-                          styles: button_checked_style
-                        grid_cell_column_pos: 2
-                        grid_cell_row_pos: 3
-                        grid_cell_x_align: STRETCH
-                        grid_cell_y_align: STRETCH
-                        widgets:
-                          - label:
-                              id: ico_settings_7
-                              align: CENTER
-                              text_font: icon_font_55
-                              text: "\U000F00AF"
-                        on_release:
-                          - lvgl.page.show: bluetooth_page
 
     - id: lock_set_page
       skip: true
@@ -3470,22 +3286,6 @@ lvgl:
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
-                    - button:
-                        align: RIGHT_MID
-                        x: -4
-                        width: 36
-                        height: 22
-                        styles: button_style
-                        pressed:
-                          styles: button_pressed_style
-                        widgets:
-                          - label:
-                              text_font: iconfont_small
-                              align: CENTER
-                              text_color: 0xFFFFFF
-                              text: "\U000F0450"
-                        on_release:
-                          - script.execute: wifi_do_scan
               - obj:
                   align: center
                   width: 100%
@@ -3512,90 +3312,6 @@ lvgl:
                         text_color: blue
                         width: 100%
                         text_align: CENTER
-                    - label:
-                        id: lbl_wifi_status
-                        text: "Tap the refresh icon to scan for networks"
-                        text_color: 0xAAAAAA
-                        width: 100%
-                        text_align: CENTER
-                        long_mode: WRAP
-                    - obj:
-                        id: wifi_scan_list
-                        width: 100%
-                        flex_grow: 1
-                        pad_all: 2
-                        bg_opa: TRANSP
-                        border_opa: TRANSP
-                        layout:
-                          type: flex
-                          flex_flow: COLUMN
-                          pad_row: 2
-                        widgets: []
-
-    - id: bluetooth_page
-      skip: true
-      widgets:
-        - obj:
-            styles: page_content
-            widgets:
-              - obj:
-                  align: TOP_MID
-                  styles: header_footer 
-                  widgets:
-                    - label:
-                        text: "Bluetooth"
-                        y: 3
-                        align: CENTER
-                        text_align: CENTER
-                        text_color: 0xFFFFFF
-                    - button:
-                        align: RIGHT_MID
-                        x: -4
-                        width: 36
-                        height: 22
-                        styles: button_style
-                        pressed:
-                          styles: button_pressed_style
-                        widgets:
-                          - label:
-                              text_font: iconfont_small
-                              align: CENTER
-                              text_color: 0xFFFFFF
-                              text: "\U000F0450"
-                        on_release:
-                          - script.execute: ble_do_scan
-              - obj:
-                  align: center
-                  width: 100%
-                  height: ${page_content_height}
-                  pad_all: 4
-                  bg_opa: TRANSP
-                  border_opa: TRANSP
-                  layout:
-                    type: flex
-                    flex_flow: COLUMN
-                    flex_align_main: START
-                    flex_align_cross: CENTER
-                  widgets:
-                    - label:
-                        id: lbl_ble_status
-                        text: "Tap the refresh icon to scan for devices"
-                        text_color: 0xAAAAAA
-                        width: 100%
-                        text_align: CENTER
-                        long_mode: WRAP
-                    - obj:
-                        id: ble_scan_list
-                        width: 100%
-                        flex_grow: 1
-                        pad_all: 2
-                        bg_opa: TRANSP
-                        border_opa: TRANSP
-                        layout:
-                          type: flex
-                          flex_flow: COLUMN
-                          pad_row: 4
-                        widgets: []
 
   style_definitions:
     ##########################################################################
@@ -3813,7 +3529,6 @@ binary_sensor:
                           - lvgl.page.is_showing: device_set_page
                           - lvgl.page.is_showing: ui_set_page
                           - lvgl.page.is_showing: wifi_page
-                          - lvgl.page.is_showing: bluetooth_page
                       then:
                         - lvgl.page.show: settings_hub_page
                       else:
