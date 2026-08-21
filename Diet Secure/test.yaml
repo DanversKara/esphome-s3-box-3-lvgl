@@ -846,7 +846,7 @@ speaker:
   - platform: resampler
     id: voip_resampling_speaker
     output_speaker: voip_mixing_input
-    sample_rate: 48000
+    sample_rate: 16000        # <-- CHANGE THIS FROM 48000 TO 16000
     bits_per_sample: 16
 
 media_player:
@@ -911,7 +911,9 @@ voip_stack:
   speaker: voip_resampling_speaker
   buffers_in_psram: true
   ringing_timeout: ${voip_ringing_timeout}
+  udp_max_payload: 1488          # <-- Add this to bypass the 1200 byte limit
   on_ringing:
+    # ... (rest of your callbacks)
     - switch.turn_on: speaker_enable
     - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
     - lvgl.label.update:
@@ -920,7 +922,7 @@ voip_stack:
         text_color: amber
     - lvgl.label.update:
         id: ico_phone_action
-        text: "\U000F03F6" # phone-in-talk — tap to answer
+        text: "\U000F03F6"  # phone-in-talk — tap to answer
         text_color: green
     - lvgl.widget.show: but_phone_decline
     - if:
@@ -936,10 +938,10 @@ voip_stack:
         text_color: 0x66CCFF
     - lvgl.label.update:
         id: ico_phone_action
-        text: "\U000F03F5" # phone-hangup — tap to cancel
+        text: "\U000F03F5"  # phone-hangup — tap to cancel
         text_color: red
     - lvgl.widget.show: but_phone_decline
-  on_streaming:
+  on_calling:          # ← was "on_streaming", renamed to match the component's API
     - switch.turn_on: speaker_enable
     - lvgl.label.update:
         id: lbl_phone_status
@@ -947,7 +949,7 @@ voip_stack:
         text_color: green
     - lvgl.label.update:
         id: ico_phone_action
-        text: "\U000F03F5" # phone-hangup — tap to hang up
+        text: "\U000F03F5"  # phone-hangup — tap to hang up
         text_color: red
     - lvgl.widget.show: but_phone_decline
   on_idle:
@@ -958,7 +960,7 @@ voip_stack:
         text_color: 0xCCCCCC
     - lvgl.label.update:
         id: ico_phone_action
-        text: "\U000F03F2" # phone — tap to call the selected contact
+        text: "\U000F03F2"  # phone — tap to call the selected contact
         text_color: 0x2F8CD8
     - lvgl.widget.hide: but_phone_decline
 
@@ -1748,6 +1750,19 @@ key_collector:
                 else:
                   - lambda: id(alarm_action) = "";
                   - lvgl.page.show: idle_page
+
+# ── ADD THIS NEW VOIP DESTINATION SENSOR HERE ──
+  - platform: voip_stack
+    id: phone_destination
+    voip_stack_id: phone
+    destination:
+      name: "Current Phone Destination"
+      internal: true
+    on_value:
+      then:
+        - lvgl.label.update:
+            id: lbl_phone_contact_name
+            text: !lambda 'return x.empty() ? "No Contact Selected" : x;'                    
 
 ###### LVGL Display UI ######
 # All UI configuration is below. 
@@ -2946,56 +2961,223 @@ lvgl:
                         on_release:
                           - lvgl.page.show: phone_page
 
-    - id: phone_page
-      skip: true
-      widgets:
+        - id: phone_page
+          skip: true
+          widgets:
         - obj:
-            styles: page_content
-            widgets:
-              - obj:
-                  align: TOP_MID
-                  styles: header_footer
-                  widgets:
-                    - label:
-                        text: '${phone_page_title}'
-                        y: 3
-                        align: CENTER
-                        text_align: CENTER
-                        text_color: 0xFFFFFF
-                    - button:
-                        align: RIGHT_MID
-                        x: -4
-                        width: 36
-                        height: 22
-                        styles: button_style
-                        pressed:
-                          styles: button_pressed_style
-                        widgets:
-                          - label:
-                              text_font: iconfont_small
-                              align: CENTER
-                              text_color: 0xFFFFFF
-                              text: "\U000F0156"
-                        on_release:
-                          then:
-                            - lvgl.page.show: menu_pages_page
+          styles: page_content
+          widgets:
+           - obj:
+               align: TOP_MID
+               styles: header_footer
+               widgets:
+                 - label:
+                     text: '${phone_page_title}'
+                     y: 3
+                     align: CENTER
+                     text_align: CENTER
+                     text_color: 0xFFFFFF
+                 - button:
+                     align: RIGHT_MID
+                     x: -4
+                     width: 36
+                     height: 22
+                     styles: button_style
+                     pressed:
+                       styles: button_pressed_style
+                     widgets:
+                       - label:
+                           text_font: iconfont_small
+                           align: CENTER
+                           text_color: 0xFFFFFF
+                           text: "\U000F0156"
+                     on_release:
+                       then:
+                         - lvgl.page.show: menu_pages_page
+           
+           # ── Main Phone Interface ──
+           - obj:
+               align: CENTER
+               width: 100%
+               height: ${page_content_height}
+               pad_all: 6
+               bg_opa: TRANSP
+               border_opa: TRANSP
+               layout:
+                 pad_row: 6
+                 pad_column: 10
+                 type: GRID
+                 grid_columns: [FR(1), FR(2), FR(1)]
+                 grid_rows: [FR(15), FR(15), FR(30), FR(20), FR(20)]
+               widgets:
+                 # 1. Call Status Label
+                 - label:
+                     id: lbl_phone_status
+                     text: "Ready"
+                     align: CENTER
+                     text_align: CENTER
+                     text_color: 0xCCCCCC
+                     text_font: my_font16
+                     grid_cell_column_pos: 0
+                     grid_cell_column_span: 3
+                     grid_cell_row_pos: 0
+                     grid_cell_x_align: STRETCH
+                     grid_cell_y_align: CENTER
+
+                 # 2. Current Contact Name (Synced from HA Phonebook)
+                 - label:
+                     id: lbl_phone_contact_name
+                     text: "No Contact Selected"
+                     align: CENTER
+                     text_align: CENTER
+                     text_color: 0x2F8CD8
+                     text_font: my_font22
+                     grid_cell_column_pos: 0
+                     grid_cell_column_span: 3
+                     grid_cell_row_pos: 1
+                     grid_cell_x_align: STRETCH
+                     grid_cell_y_align: CENTER
+
+                 # 3. Previous Contact
+                 - button:
+                     id: but_phone_prev
+                     styles: button_style
+                     pressed:
+                       styles: button_pressed_style
+                     grid_cell_column_pos: 0
+                     grid_cell_row_pos: 2
+                     grid_cell_x_align: STRETCH
+                     grid_cell_y_align: STRETCH
+                     widgets:
+                       - label:
+                           align: CENTER
+                           text_font: icon_font_55
+                           text_color: 0x999999
+                           text: "\U000F0B28"
+                     on_release:
+                       - voip_stack.prev_contact:
+                           id: phone
+
+                 # 4. Main Call / Answer / Hangup Button
+                 - button:
+                     id: but_phone_action
+                     styles: button_style
+                     pressed:
+                       styles: button_pressed_style
+                     grid_cell_column_pos: 1
+                     grid_cell_row_pos: 2
+                     grid_cell_x_align: STRETCH
+                     grid_cell_y_align: STRETCH
+                     widgets:
+                       - label:
+                           id: ico_phone_action
+                           align: CENTER
+                           text_font: icon_font_55
+                           text_color: 0x2F8CD8
+                           text: "\U000F03F2"
+                     on_release:
+                       - voip_stack.call_toggle:
+                           id: phone
+
+                 # 5. Next Contact
+                 - button:
+                     id: but_phone_next
+                     styles: button_style
+                     pressed:
+                       styles: button_pressed_style
+                     grid_cell_column_pos: 2
+                     grid_cell_row_pos: 2
+                     grid_cell_x_align: STRETCH
+                     grid_cell_y_align: STRETCH
+                     widgets:
+                       - label:
+                           align: CENTER
+                           text_font: icon_font_55
+                           text_color: 0x999999
+                           text: "\U000F0B2A"
+                     on_release:
+                       - voip_stack.next_contact:
+                           id: phone
+
+                 # 6. Quick Dial 555 (ChanSpy) Button
+                 - button:
+                     id: but_phone_dial_555
+                     styles: button_standard_style
+                     pressed:
+                       styles: button_pressed_style
+                     grid_cell_column_pos: 0
+                     grid_cell_column_span: 3
+                     grid_cell_row_pos: 3
+                     grid_cell_x_align: STRETCH
+                     grid_cell_y_align: STRETCH
+                     widgets:
+                       - label:
+                           align: CENTER
+                           text_font: my_font16
+                           text_color: 0xFFFFFF
+                           text: "Dial 555 (ChanSpy)"
+                     on_release:
+                       - voip_stack.call:
+                           id: phone
+                           target: "555"
+
+                 # 7. Decline Call (Hidden when idle)
+                 - button:
+                     id: but_phone_decline
+                     hidden: true
+                     styles: button_style
+                     pressed:
+                       styles: button_pressed_style
+                     grid_cell_column_pos: 0
+                     grid_cell_column_span: 3
+                     grid_cell_row_pos: 4
+                     grid_cell_x_align: STRETCH
+                     grid_cell_y_align: STRETCH
+                     widgets:
+                       - label:
+                           align: CENTER
+                           text_font: iconfont_small
+                           text_color: red
+                           text: "\U000F03F5"
+                       - label:
+                           text: "  Decline / Hangup"
+                           align: CENTER
+                           text_color: red
+                     on_release:
+                       - voip_stack.decline_call:
+                           id: phone
+
+                 # 8. Auto Answer Toggle
+                 - checkbox:
+                     id: chk_phone_auto_answer
+                     text: "Auto Answer"
+                     align: LEFT_MID
+                     text_align: LEFT
+                     text_color: 0xFFFFFF
+                     grid_cell_column_pos: 0
+                     grid_cell_column_span: 3
+                     grid_cell_row_pos: 4
+                     grid_cell_x_align: START
+                     grid_cell_y_align: CENTER
+                     on_change:
+                       switch.toggle: sw_phone_auto_answer
               # ── Call status + main call/answer/hangup action. ico_phone_action
               # and lbl_phone_status are driven by the voip_stack on_ringing /
               # on_outgoing_call / on_streaming / on_idle callbacks above. ──
-              - obj:
-                  align: CENTER
-                  width: 100%
-                  height: ${page_content_height}
-                  pad_all: 6
-                  bg_opa: TRANSP
-                  border_opa: TRANSP
-                  layout:
+                 - obj:
+                   align: CENTER
+                   width: 100%
+                   height: ${page_content_height}
+                   pad_all: 6
+                   bg_opa: TRANSP
+                   border_opa: TRANSP
+                   layout:
                     pad_row: 4
                     pad_column: 10
                     type: GRID
                     grid_columns: [FR(1), FR(2), FR(1)]
                     grid_rows: [FR(15), FR(45), FR(20), FR(20)]
-                  widgets:
+                   widgets:
                     - label:
                         id: lbl_phone_status
                         text: "Ready"
