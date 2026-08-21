@@ -114,7 +114,7 @@ substitutions:
   phone_page_title: "Phone"
   voip_transport: tcp
   voip_ringing_timeout: 30s
-  phone_extension: "701" # dialable extension for this box, once HA exposes
+  phone_extension: "704" # Updated to 704 for FreePBX ChanSpy testing
                           # an extension field for the bound phone entry —
                           # verify this actually lands where you expect on
                           # the HA side before relying on it
@@ -846,7 +846,7 @@ speaker:
   - platform: resampler
     id: voip_resampling_speaker
     output_speaker: voip_mixing_input
-    sample_rate: 16000        # <-- CHANGE THIS FROM 48000 TO 16000
+    sample_rate: 16000        # FIXED: 16kHz prevents 1536-byte payload fragmentation
     bits_per_sample: 16
 
 media_player:
@@ -911,9 +911,7 @@ voip_stack:
   speaker: voip_resampling_speaker
   buffers_in_psram: true
   ringing_timeout: ${voip_ringing_timeout}
-  udp_max_payload: 1488          # <-- Add this to bypass the 1200 byte limit
   on_ringing:
-    # ... (rest of your callbacks)
     - switch.turn_on: speaker_enable
     - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
     - lvgl.label.update:
@@ -941,7 +939,7 @@ voip_stack:
         text: "\U000F03F5"  # phone-hangup — tap to cancel
         text_color: red
     - lvgl.widget.show: but_phone_decline
-  on_calling:          # ← was "on_streaming", renamed to match the component's API
+  on_calling:          # FIXED: was "on_streaming", renamed to match component API
     - switch.turn_on: speaker_enable
     - lvgl.label.update:
         id: lbl_phone_status
@@ -1751,7 +1749,7 @@ key_collector:
                   - lambda: id(alarm_action) = "";
                   - lvgl.page.show: idle_page
 
-# ── ADD THIS NEW VOIP DESTINATION SENSOR HERE ──
+  # ── VOIP DESTINATION SENSOR (Shows who you are about to call) ──
   - platform: voip_stack
     id: phone_destination
     voip_stack_id: phone
@@ -1762,7 +1760,7 @@ key_collector:
       then:
         - lvgl.label.update:
             id: lbl_phone_contact_name
-            text: !lambda 'return x.empty() ? "No Contact Selected" : x;'                    
+            text: !lambda 'return x.empty() ? "No Contact Selected" : x;'            
 
 ###### LVGL Display UI ######
 # All UI configuration is below. 
@@ -2961,12 +2959,12 @@ lvgl:
                         on_release:
                           - lvgl.page.show: phone_page
 
-        - id: phone_page
-          skip: true
-          widgets:
-        - obj:
-          styles: page_content
-          widgets:
+ - id: phone_page
+   skip: true
+   widgets:
+     - obj:
+         styles: page_content
+         widgets:
            - obj:
                align: TOP_MID
                styles: header_footer
@@ -3008,7 +3006,7 @@ lvgl:
                  pad_column: 10
                  type: GRID
                  grid_columns: [FR(1), FR(2), FR(1)]
-                 grid_rows: [FR(15), FR(15), FR(30), FR(20), FR(20)]
+                 grid_rows: [FR(12), FR(12), FR(30), FR(20), FR(26)]
                widgets:
                  # 1. Call Status Label
                  - label:
